@@ -1,5 +1,29 @@
 package com.betanalyzer.domain.enums;
 
 public enum MatchStatus {
-    SCHEDULED, LIVE, FINISHED
+    TBD, NS, LIVE, FT, HT, ET, P, AET, SUSP, ABD, PST, CANC,
+    ONE_H("1H"), TWO_H("2H");
+
+    private String code;
+
+    MatchStatus() {
+    }
+
+    MatchStatus(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code != null ? code : name();
+    }
+
+    public static MatchStatus fromCode(String code) {
+        if (code == null) return null;
+        for (MatchStatus status : values()) {
+            if (status.getCode().equalsIgnoreCase(code) || status.name().equalsIgnoreCase(code)) {
+                return status;
+            }
+        }
+        return TBD; // Default or could throw exception
+    }
 }

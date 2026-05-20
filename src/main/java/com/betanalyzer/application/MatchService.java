@@ -98,8 +98,12 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
-    public List<MatchResponseDTO> getMatchesByLeague(String league) {
-        return matchRepository.findByLeague(league).stream()
+    public List<MatchResponseDTO> getMatchesByLeague(String leagueName) {
+        // Agora league é uma entidade, precisamos buscar por nome ou ID.
+        // Como o método original recebia String, vamos assumir busca por nome na entidade League.
+        // Simplificando: vamos remover esse método ou ajustar para usar LeagueRepository
+        return matchRepository.findAll().stream()
+                .filter(m -> m.getLeague().getName().equalsIgnoreCase(leagueName))
                 .map(matchMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }

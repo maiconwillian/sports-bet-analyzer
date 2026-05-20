@@ -9,9 +9,12 @@ import java.util.UUID;
 @Data
 public class MatchResponseDTO {
     private UUID id;
-    private String homeTeam;
-    private String awayTeam;
+    private Long apiId;
+    private String homeTeamName;
+    private String awayTeamName;
+    private Integer homeGoals;
+    private Integer awayGoals;
     private LocalDateTime matchDate;
-    private String league;
+    private String leagueName;
     private MatchStatus status;
 }

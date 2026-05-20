@@ -52,29 +52,23 @@ class MatchServiceTest {
         );
         
         Match match = Match.builder()
-                .homeTeam("Flamengo")
-                .awayTeam("Vasco")
                 .matchDate(matchDate)
-                .league("Brasileirão")
-                .status(MatchStatus.SCHEDULED)
+                .status(MatchStatus.NS)
                 .build();
         
         Match savedMatch = Match.builder()
                 .id(UUID.randomUUID())
-                .homeTeam("Flamengo")
-                .awayTeam("Vasco")
                 .matchDate(matchDate)
-                .league("Brasileirão")
-                .status(MatchStatus.SCHEDULED)
+                .status(MatchStatus.NS)
                 .build();
         
         MatchResponseDTO responseDTO = new MatchResponseDTO();
         responseDTO.setId(savedMatch.getId());
-        responseDTO.setHomeTeam("Flamengo");
-        responseDTO.setAwayTeam("Vasco");
+        responseDTO.setHomeTeamName("Flamengo");
+        responseDTO.setAwayTeamName("Vasco");
         responseDTO.setMatchDate(matchDate);
-        responseDTO.setLeague("Brasileirão");
-        responseDTO.setStatus(MatchStatus.SCHEDULED);
+        responseDTO.setLeagueName("Brasileirão");
+        responseDTO.setStatus(MatchStatus.NS);
 
         when(matchMapper.toEntity(request)).thenReturn(match);
         when(matchRepository.save(any(Match.class))).thenReturn(savedMatch);
@@ -85,8 +79,8 @@ class MatchServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.getHomeTeam()).isEqualTo("Flamengo");
-        assertThat(result.getAwayTeam()).isEqualTo("Vasco");
+        assertThat(result.getHomeTeamName()).isEqualTo("Flamengo");
+        assertThat(result.getAwayTeamName()).isEqualTo("Vasco");
         assertThat(result.getId()).isEqualTo(savedMatch.getId());
     }
 

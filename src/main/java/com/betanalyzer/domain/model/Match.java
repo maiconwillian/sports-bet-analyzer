@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,23 +24,46 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private String homeTeam;
+    @Column(name = "api_id", unique = true, nullable = false)
+    private Long apiId;
 
-    @Column(nullable = false)
-    private String awayTeam;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "league_id", nullable = false)
+    private League league;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "home_team_id", nullable = false)
+    private Team homeTeam;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "away_team_id", nullable = false)
+    private Team awayTeam;
+
+    @Column(name = "home_goals")
+    private Integer homeGoals;
+
+    @Column(name = "away_goals")
+    private Integer awayGoals;
+
+    @Column(name = "match_date", nullable = false)
     private LocalDateTime matchDate;
 
-    @Column(nullable = false)
-    private String league;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private MatchStatus status;
 
+    private String referee;
+
+    private String venue;
+
+    @Column(name = "venue_city")
+    private String venueCity;
+
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
