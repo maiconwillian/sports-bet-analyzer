@@ -11,12 +11,16 @@ import com.betanalyzer.shared.exception.MatchNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MatchStatsService {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchStatsService.class);
 
     private final MatchStatsRepository statsRepository;
     private final MatchRepository matchRepository;
@@ -31,6 +35,7 @@ public class MatchStatsService {
 
     @Transactional
     public MatchStatsResponseDTO createStats(UUID matchId, MatchStatsRequestDTO request) {
+        log.info("Creating stats for match: {}", matchId);
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + matchId));
         
@@ -41,6 +46,7 @@ public class MatchStatsService {
 
     @Transactional
     public MatchStatsResponseDTO updateStats(UUID matchId, MatchStatsRequestDTO request) {
+        log.info("Updating stats for match: {}", matchId);
         MatchStats stats = statsRepository.findByMatchId(matchId)
                 .orElseThrow(() -> new MatchNotFoundException("Stats not found for match: " + matchId));
         

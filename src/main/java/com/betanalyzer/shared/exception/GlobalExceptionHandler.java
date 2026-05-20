@@ -6,42 +6,40 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({MatchNotFoundException.class, OddsNotFoundException.class, SuggestionNotFoundException.class})
-    public ResponseEntity<Object> handleNotFoundException(RuntimeException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", ex.getClass().getSimpleName());
-        body.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleNotFoundException(RuntimeException ex) {
+        ErrorResponse error = new ErrorResponse(
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({InvalidMatchStatusException.class, BusinessLogicException.class})
-    public ResponseEntity<Object> handleBadRequestException(RuntimeException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", ex.getClass().getSimpleName());
-        body.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> handleBadRequestException(RuntimeException ex) {
+        ErrorResponse error = new ErrorResponse(
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGeneralException(Exception ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("error", "Internal Server Error");
-        body.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
+        ErrorResponse error = new ErrorResponse(
+                "Internal Server Error",
+                ex.getMessage(),
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

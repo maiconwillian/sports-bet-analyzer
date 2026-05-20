@@ -12,6 +12,8 @@ import com.betanalyzer.shared.exception.OddsNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OddsService {
+
+    private static final Logger log = LoggerFactory.getLogger(OddsService.class);
 
     private final OddsRepository oddsRepository;
     private final MatchRepository matchRepository;
@@ -42,6 +46,7 @@ public class OddsService {
 
     @Transactional
     public OddsResponseDTO saveOdds(UUID matchId, OddsRequestDTO request) {
+        log.info("Saving odds for match: {} from bookmaker: {}", matchId, request.bookmaker());
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + matchId));
         
@@ -59,6 +64,7 @@ public class OddsService {
 
     @Transactional
     public List<OddsResponseDTO> captureOddsSnapshot(UUID matchId) {
+        log.info("Capturing odds snapshot for match: {}", matchId);
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + matchId));
         

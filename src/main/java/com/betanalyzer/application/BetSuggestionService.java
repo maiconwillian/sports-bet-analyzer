@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BetSuggestionService {
+
+    private static final Logger log = LoggerFactory.getLogger(BetSuggestionService.class);
 
     private final BetSuggestionRepository suggestionRepository;
     private final MatchRepository matchRepository;
@@ -57,6 +61,7 @@ public class BetSuggestionService {
 
     @Transactional
     public SuggestionResponseDTO createSuggestion(CreateSuggestionRequest request) {
+        log.info("Creating suggestion for match: {} on market: {}", request.matchId(), request.market());
         Match match = matchRepository.findById(request.matchId())
                 .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + request.matchId()));
 
@@ -67,6 +72,7 @@ public class BetSuggestionService {
 
     @Transactional
     public SuggestionResponseDTO updateSuggestionResult(UUID id, SuggestionResultRequest request) {
+        log.info("Updating suggestion result for id: {} to {}", id, request.actualResult());
         BetSuggestion suggestion = suggestionRepository.findById(id)
                 .orElseThrow(() -> new SuggestionNotFoundException("Suggestion not found with id: " + id));
 

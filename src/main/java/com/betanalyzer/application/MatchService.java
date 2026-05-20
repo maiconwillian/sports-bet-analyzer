@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MatchService {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchService.class);
 
     private final MatchRepository matchRepository;
     private final MatchMapper matchMapper;
@@ -41,12 +45,14 @@ public class MatchService {
 
     @Transactional
     public MatchResponseDTO createMatch(CreateMatchRequest request) {
+        log.info("Creating match: {} vs {}", request.homeTeam(), request.awayTeam());
         Match match = matchMapper.toEntity(request);
         return matchMapper.toResponseDTO(matchRepository.save(match));
     }
 
     @Transactional
     public MatchResponseDTO updateMatch(UUID id, UpdateMatchRequest request) {
+        log.info("Updating match status for id: {}", id);
         Match match = matchRepository.findById(id)
                 .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + id));
         matchMapper.updateEntityFromRequest(request, match);
@@ -55,6 +61,7 @@ public class MatchService {
 
     @Transactional
     public void deleteMatch(UUID id) {
+        log.info("Deleting match with id: {}", id);
         if (!matchRepository.existsById(id)) {
             throw new MatchNotFoundException("Match not found with id: " + id);
         }

@@ -1,6 +1,8 @@
 spring:
   application:
     name: sports-bet-analyzer
+  webflux:
+    base-path: /api
   datasource:
     url: jdbc:postgresql://localhost:5432/oddwise
     username: postgres
@@ -19,10 +21,47 @@ spring:
 
 logging:
   level:
+    com.betanalyzer: INFO
+    org.springframework.web.client: WARN
     root: INFO
-    com.betanalyzer: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 server:
   port: 8080
+
+api:
+  football:
+    base-url: https://v3.football.api-sports.io
+    key: ${API_FOOTBALL_KEY}
+    host: v3.football.api-sports.io
+    connect-timeout-ms: 5000
+    read-timeout-ms: 10000
+
+resilience4j:
+  retry:
+    instances:
+      apiFootball:
+        max-attempts: 3
+        wait-duration: 1000ms
+        retry-exceptions: 
+          - java.io.IOException
+          - java.net.ConnectException
+        ignore-exceptions:
+          - com.betanalyzer.shared.exception.ApiClientException
+  
+  circuit-breaker:
+    instances:
+      apiFootball:
+        register-health-indicator: true
+        sliding-window-size: 10
+        failure-rate-threshold: 50.0
+        wait-duration-in-open-state: 60000ms
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+  
+  timelimit:
+    instances:
+      apiFootball:
+        timeout-duration: 15s
+        cancel-running-future: true

@@ -7,6 +7,8 @@ import com.betanalyzer.infrastructure.persistence.BetSuggestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,10 +24,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReportService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReportService.class);
+
     private final BetSuggestionRepository suggestionRepository;
 
     @Transactional(readOnly = true)
     public RoiReportDTO getROIReport(LocalDate from, LocalDate to) {
+        log.info("Generating ROI report from {} to {}", from, to);
         LocalDateTime start = from.atStartOfDay();
         LocalDateTime end = to.atTime(LocalTime.MAX);
         List<BetSuggestion> suggestions = suggestionRepository.findByCreatedAtBetween(start, end);
