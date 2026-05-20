@@ -5,11 +5,14 @@ import com.betanalyzer.domain.enums.MatchStatus;
 import com.betanalyzer.domain.model.League;
 import com.betanalyzer.domain.model.Match;
 import com.betanalyzer.domain.model.Team;
+import com.betanalyzer.application.service.DataQualityValidator;
+import com.betanalyzer.domain.enums.SupportedLeague;
 import com.betanalyzer.infrastructure.client.dto.FixtureDTO;
 import org.mapstruct.*;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MatchMapper {
@@ -29,6 +32,13 @@ public interface MatchMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Match mapApiDtoToEntity(FixtureDTO fixtureDTO, League league, Team homeTeam, Team awayTeam);
+
+    default Optional<Match> mapWithQualityCheck(FixtureDTO fixtureDTO, League league, Team homeTeam, Team awayTeam, SupportedLeague supportedLeague, DataQualityValidator validator) {
+        if (validator.isQualityFixture(fixtureDTO, supportedLeague)) {
+            return Optional.of(mapApiDtoToEntity(fixtureDTO, league, homeTeam, awayTeam));
+        }
+        return Optional.empty();
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "apiId", source = "fixtureDTO.fixture.id")

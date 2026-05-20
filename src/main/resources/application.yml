@@ -36,3 +36,17 @@ api:
     host: v3.football.api-sports.io
     connect-timeout-ms: 5000
     read-timeout-ms: 10000
+
+app:
+  data-quality:
+    minimum-threshold: 85
+    filter-amistosos: true
+    filter-pre-temporada: true
+    filter-estaduais: true
+    supported-leagues:
+      - BRASILEIRAO
+      - PREMIER_LEAGUE
+      - CHAMPIONS_LEAGUE
+    supported-markets:
+      - OVER_2_5
+      - BTTS

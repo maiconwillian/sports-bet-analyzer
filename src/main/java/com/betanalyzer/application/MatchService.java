@@ -4,19 +4,21 @@ import com.betanalyzer.application.dto.MatchResponseDTO;
 import com.betanalyzer.application.dto.request.CreateMatchRequest;
 import com.betanalyzer.application.dto.request.UpdateMatchRequest;
 import com.betanalyzer.application.mapper.MatchMapper;
+import com.betanalyzer.application.service.DataQualityValidator;
+import com.betanalyzer.domain.enums.SupportedLeague;
+import com.betanalyzer.domain.model.League;
 import com.betanalyzer.domain.model.Match;
-import com.betanalyzer.infrastructure.persistence.BetSuggestionRepository;
-import com.betanalyzer.infrastructure.persistence.MatchRepository;
-import com.betanalyzer.infrastructure.persistence.MatchStatsRepository;
-import com.betanalyzer.infrastructure.persistence.OddsRepository;
+import com.betanalyzer.domain.model.Team;
+import com.betanalyzer.infrastructure.client.ApiFootballClient;
+import com.betanalyzer.infrastructure.client.dto.FixtureDTO;
+import com.betanalyzer.infrastructure.persistence.*;
 import com.betanalyzer.shared.exception.MatchNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,15 +29,18 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MatchService {
-
-    private static final Logger log = LoggerFactory.getLogger(MatchService.class);
 
     private final MatchRepository matchRepository;
     private final BetSuggestionRepository suggestionRepository;
     private final OddsRepository oddsRepository;
     private final MatchStatsRepository matchStatsRepository;
     private final MatchMapper matchMapper;
+    private final ApiFootballClient apiFootballClient;
+    private final LeagueRepository leagueRepository;
+    private final TeamRepository teamRepository;
+    private final DataQualityValidator dataQualityValidator;
 
     @Transactional(readOnly = true)
     public Page<MatchResponseDTO> getAllMatches(Pageable pageable) {
@@ -99,12 +104,74 @@ public class MatchService {
 
     @Transactional(readOnly = true)
     public List<MatchResponseDTO> getMatchesByLeague(String leagueName) {
-        // Agora league é uma entidade, precisamos buscar por nome ou ID.
-        // Como o método original recebia String, vamos assumir busca por nome na entidade League.
-        // Simplificando: vamos remover esse método ou ajustar para usar LeagueRepository
         return matchRepository.findAll().stream()
                 .filter(m -> m.getLeague().getName().equalsIgnoreCase(leagueName))
                 .map(matchMapper::toResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void syncQualityFixtures(LocalDate date, SupportedLeague supportedLeague) {
+        log.info("Syncing quality fixtures for league: {} on date: {}", supportedLeague, date);
+        
+        List<FixtureDTO> qualityFixtures = apiFootballClient.getQualityFixtures(date, supportedLeague);
+        int totalFetched = qualityFixtures.size();
+        int savedCount = 0;
+        int filteredCount = 0;
+
+        for (FixtureDTO dto : qualityFixtures) {
+            // Re-validate using the entity mapper quality check
+            // First we need the League and Team entities
+            League league = leagueRepository.findByApiId(dto.league().id())
+                    .orElseGet(() -> leagueRepository.save(League.builder()
+                            .apiId(dto.league().id())
+                            .name(dto.league().name())
+                            .country(dto.league().country())
+                            .season(dto.league().season())
+                            .build()));
+
+            Team homeTeam = teamRepository.findByApiId(dto.teams().home().id())
+                    .orElseGet(() -> teamRepository.save(Team.builder()
+                            .apiId(dto.teams().home().id())
+                            .name(dto.teams().home().name())
+                            .logo(dto.teams().home().logo())
+                            .build()));
+
+            Team awayTeam = teamRepository.findByApiId(dto.teams().away().id())
+                    .orElseGet(() -> teamRepository.save(Team.builder()
+                            .apiId(dto.teams().away().id())
+                            .name(dto.teams().away().name())
+                            .logo(dto.teams().away().logo())
+                            .build()));
+
+            matchMapper.mapWithQualityCheck(dto, league, homeTeam, awayTeam, supportedLeague, dataQualityValidator)
+                    .ifPresentOrElse(match -> {
+                        matchRepository.findByApiId(match.getApiId())
+                                .ifPresentOrElse(
+                                        existing -> {
+                                            matchMapper.updateEntity(dto, league, homeTeam, awayTeam, existing);
+                                            matchRepository.save(existing);
+                                        },
+                                        () -> matchRepository.save(match)
+                                );
+                    }, () -> {
+                        // This shouldn't normally happen as apiFootballClient.getQualityFixtures already filters,
+                        // but it's good for double safety and matching the requirement.
+                    });
+            savedCount++;
+        }
+        
+        // Note: The totalFetched from getQualityFixtures is already filtered.
+        // To get the "filtered" count as requested, we'd need the count from allFixtures.
+        // Let's adjust to reflect the requirement "Fetched 50 fixtures, kept 32, filtered 18"
+        
+        List<FixtureDTO> allFixtures = apiFootballClient.getFixturesByDate(date);
+        int totalRaw = (int) allFixtures.stream()
+                .filter(f -> f.league().name().equalsIgnoreCase(supportedLeague.getApiName()))
+                .count();
+        filteredCount = totalRaw - savedCount;
+        double noisePercent = totalRaw > 0 ? (filteredCount * 100.0 / totalRaw) : 0;
+
+        log.info("Fetched {} fixtures, kept {}, filtered {} ({}% ruído)", totalRaw, savedCount, filteredCount, String.format("%.0f", noisePercent));
     }
 }

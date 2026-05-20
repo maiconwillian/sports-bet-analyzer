@@ -1,8 +1,8 @@
 # 🎯 Sports Bet Analyzer - PROJECT CHARTER
 
 **Última Atualização:** 2026-05-20
-**Status:** ✅ Phase 1.2 - Persistence + Historical Data (Concluído)
-**Versão:** 2.2
+**Status:** 🚀 Phase 1.2 - Data Ingestion (COMPLETO)
+**Versão:** 2.2 (Completo)
 
 ---
 
@@ -50,30 +50,62 @@ Gerar de forma automatizada entre 3 e 5 sugestões de apostas semanais com expec
 * **MapStruct** - DTO mapping
 
 ### Banco de Dados
-* **PostgreSQL 16** - Primary database (histórico = ouro)
+* **PostgreSQL 16** - Primary database (histórico = ouro) ✅ **ATIVO**
+* **Flyway** - Database migrations ✅ **ATIVO**
 * **Redis** - Cache + rate limit (Futuro Phase 3)
 * **MongoDB** - IA + histórico RAW (Futuro Phase 4)
 
 ### Integrações Externas
-* **API-Football** - Stats + Fixtures ✅ **COMPLETO (Phase 1.1)**
-* **Persistence + Historical Data** ✅ **COMPLETO (Phase 1.2)**
-* **The Odds API** - Odds + Market Data 🔄 **A INICIAR (Phase 1.3)**
+* **API-Football** - Stats + Fixtures ✅ **INTEGRADO (Phase 1.1)**
+* **The Odds API** - Odds + Market Data (Futuro Phase 1.4)
 * **n8n** - Automação + Scheduler (Futuro Phase 2)
 * **Telegram Bot API** - Notificações (Futuro Phase 5)
 
 ### Infraestrutura
-* **Docker** + **Docker Compose** - Containerização
+* **Docker** + **Docker Compose** - Containerização ✅ **ATIVO**
 * **GitHub** - Versionamento
 * **GitHub Actions** - CI/CD (Futuro)
-* **PostgreSQL 16** - Local + Production
+* **PostgreSQL 16** - Local + Production ✅ **ATIVO**
 
 ### Padrões Arquiteturais
-* **Clean Architecture** - Separação clara de camadas
-* **SOLID Principles** - Código robusto
-* **Modular Monolith** - Pronto para evoluir
-* **Domain-Oriented Design** - Negócio-centric
+* **Clean Architecture** - Separação clara de camadas ✅ **IMPLEMENTADO**
+* **SOLID Principles** - Código robusto ✅ **IMPLEMENTADO**
+* **Modular Monolith** - Pronto para evoluir ✅ **IMPLEMENTADO**
+* **Domain-Oriented Design** - Negócio-centric ✅ **IMPLEMENTADO**
 * **Event-Driven Ready** - Para kafka/rabbitmq futuro
 
+
+## 🔥 FILOSOFIA: NARROW AND DEEP, NÃO BROAD AND SHALLOW
+
+### Princípio Core
+Em vez de tentar analisar TUDO, **especializamos em NICHOS**:
+
+✅ **3 Ligas APENAS:**
+- Brasileirão Série A (conhecimento local + 90 dados)
+- Premier League (histórico rico + 98 qualidade)
+- Champions League (relevância + 97 qualidade)
+
+✅ **1 Mercado INICIAL:**
+- Over 2.5 Goals (95% modelável, estatístico)
+- (Futuro: BTTS - 92% modelável)
+
+❌ **JAMAIS:**
+- Analisar "Winner" (muito emocional, zebra destrói modelo)
+- Analisar TODOS os mercados ao mesmo tempo
+- Misturar Série B com Série A
+- Incluir amistosos/pré-temporada
+
+### Por quê?
+- **Menos ruído** = Padrões mais claros
+- **Menos API calls** = Mais barato
+- **Modelo melhor** = ROI mais alto
+- **Menos bugs** = Menos variáveis
+
+### Implementação
+- `SupportedLeague` enum (com data quality score)
+- `SupportedMarket` enum (com reasoning)
+- `DataQualityValidator` (filtra amistosos, ligas obscuras)
+- Cada liga tem threshold mínimo de 85 de qualidade
 ---
 
 ## 🧱 ARQUITETURA CORE
