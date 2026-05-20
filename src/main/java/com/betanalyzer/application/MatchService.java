@@ -5,7 +5,10 @@ import com.betanalyzer.application.dto.request.CreateMatchRequest;
 import com.betanalyzer.application.dto.request.UpdateMatchRequest;
 import com.betanalyzer.application.mapper.MatchMapper;
 import com.betanalyzer.domain.model.Match;
+import com.betanalyzer.infrastructure.persistence.BetSuggestionRepository;
 import com.betanalyzer.infrastructure.persistence.MatchRepository;
+import com.betanalyzer.infrastructure.persistence.MatchStatsRepository;
+import com.betanalyzer.infrastructure.persistence.OddsRepository;
 import com.betanalyzer.shared.exception.MatchNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +32,9 @@ public class MatchService {
     private static final Logger log = LoggerFactory.getLogger(MatchService.class);
 
     private final MatchRepository matchRepository;
+    private final BetSuggestionRepository suggestionRepository;
+    private final OddsRepository oddsRepository;
+    private final MatchStatsRepository matchStatsRepository;
     private final MatchMapper matchMapper;
 
     @Transactional(readOnly = true)
@@ -62,10 +68,24 @@ public class MatchService {
     @Transactional
     public void deleteMatch(UUID id) {
         log.info("Deleting match with id: {}", id);
-        if (!matchRepository.existsById(id)) {
-            throw new MatchNotFoundException("Match not found with id: " + id);
-        }
-        matchRepository.deleteById(id);
+        
+        Match match = matchRepository.findById(id)
+                .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + id));
+        
+        // Deleta em ordem (respeita FK constraints)
+        // 1. Deletar sugestões
+        suggestionRepository.deleteByMatchId(id);
+        
+        // 2. Deletar odds
+        oddsRepository.deleteByMatchId(id);
+        
+        // 3. Deletar stats
+        matchStatsRepository.deleteByMatchId(id);
+        
+        // 4. Agora pode deletar o match
+        matchRepository.delete(match);
+        
+        log.info("Match {} deleted successfully with all dependencies", id);
     }
 
     @Transactional(readOnly = true)

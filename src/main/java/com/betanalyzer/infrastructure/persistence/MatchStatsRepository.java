@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface MatchStatsRepository extends JpaRepository<MatchStats, UUID> {
     Optional<MatchStats> findByMatchId(UUID matchId);
+    void deleteByMatchId(UUID matchId);
 }

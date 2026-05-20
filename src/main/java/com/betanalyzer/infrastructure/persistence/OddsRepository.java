@@ -14,4 +14,5 @@ public interface OddsRepository extends JpaRepository<Odds, UUID> {
     Optional<Odds> findFirstByMatchIdOrderByCapturedAtDesc(UUID matchId);
     List<Odds> findByBookmaker(String bookmaker);
     List<Odds> findByMatchIdOrderByCapturedAtAsc(UUID matchId);
+    void deleteByMatchId(UUID matchId);
 }

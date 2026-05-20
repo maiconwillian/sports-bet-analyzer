@@ -5,7 +5,10 @@ import com.betanalyzer.application.dto.request.CreateMatchRequest;
 import com.betanalyzer.application.mapper.MatchMapper;
 import com.betanalyzer.domain.enums.MatchStatus;
 import com.betanalyzer.domain.model.Match;
+import com.betanalyzer.infrastructure.persistence.BetSuggestionRepository;
 import com.betanalyzer.infrastructure.persistence.MatchRepository;
+import com.betanalyzer.infrastructure.persistence.MatchStatsRepository;
+import com.betanalyzer.infrastructure.persistence.OddsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +27,15 @@ class MatchServiceTest {
 
     @Mock
     private MatchRepository matchRepository;
+
+    @Mock
+    private BetSuggestionRepository suggestionRepository;
+
+    @Mock
+    private OddsRepository oddsRepository;
+
+    @Mock
+    private MatchStatsRepository matchStatsRepository;
 
     @Mock
     private MatchMapper matchMapper;
@@ -76,5 +88,23 @@ class MatchServiceTest {
         assertThat(result.getHomeTeam()).isEqualTo("Flamengo");
         assertThat(result.getAwayTeam()).isEqualTo("Vasco");
         assertThat(result.getId()).isEqualTo(savedMatch.getId());
+    }
+
+    @Test
+    void shouldDeleteMatchSuccessfully() {
+        // given
+        UUID matchId = UUID.randomUUID();
+        Match match = Match.builder().id(matchId).build();
+
+        when(matchRepository.findById(matchId)).thenReturn(java.util.Optional.of(match));
+
+        // when
+        matchService.deleteMatch(matchId);
+
+        // then
+        org.mockito.Mockito.verify(suggestionRepository).deleteByMatchId(matchId);
+        org.mockito.Mockito.verify(oddsRepository).deleteByMatchId(matchId);
+        org.mockito.Mockito.verify(matchStatsRepository).deleteByMatchId(matchId);
+        org.mockito.Mockito.verify(matchRepository).delete(match);
     }
 }

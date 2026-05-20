@@ -62,29 +62,15 @@ public class OddsService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<OddsResponseDTO> captureOddsSnapshot(UUID matchId) {
-        log.info("Capturing odds snapshot for match: {}", matchId);
-        Match match = matchRepository.findById(matchId)
+        log.info("Retrieving current odds snapshot for match: {}", matchId);
+        
+        matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + matchId));
         
-        // Em um cenário real, aqui chamaria um scraper ou API externa.
-        // Como é CRUD básico, vamos simular buscando a última e salvando uma nova captura.
-        Odds latest = oddsRepository.findFirstByMatchIdOrderByCapturedAtDesc(matchId)
-                .orElse(null);
-        
-        if (latest != null) {
-            Odds snapshot = Odds.builder()
-                    .match(match)
-                    .bookmaker(latest.getBookmaker())
-                    .homeWinOdd(latest.getHomeWinOdd())
-                    .drawOdd(latest.getDrawOdd())
-                    .awayWinOdd(latest.getAwayWinOdd())
-                    .capturedAt(LocalDateTime.now())
-                    .build();
-            oddsRepository.save(snapshot);
-        }
-        
+        // TODO: Integrar com API-Football na SPRINT 2.2
+        // Retorna odds atualmente capturadas (não duplica)
         return getOddsByMatch(matchId);
     }
 
