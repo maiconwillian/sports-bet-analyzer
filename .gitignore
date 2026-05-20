@@ -1,0 +1,111 @@
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+.kotlin/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+*.code-workspace
+
+### Mac OS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.backup
+release.properties
+dependency-reduced-pom.xml
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+.m2/
+
+### Spring Boot ###
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Gradle ###
+.gradle/
+build/
+
+### Environment Variables ###
+.env
+.env.local
+.env.*.local
+
+### Logs ###
+logs/
+*.log
+log/
+
+### System Files ###
+Thumbs.db
+.DS_Store
+*.swp
+*.swo
+*~
+.LSOverride
+
+### OS Generated ###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+### Database ###
+*.db
+*.sqlite
+
+### Docker ###
+.docker/
+.dockerignore
+docker-compose.override.yml
+
+### Misc ###
+.classpath
+.project
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.tmp
+.history/
+
+### Node (if using npm scripts) ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
