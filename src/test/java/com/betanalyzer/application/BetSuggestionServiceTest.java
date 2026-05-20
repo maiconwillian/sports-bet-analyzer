@@ -1,8 +1,10 @@
 package com.betanalyzer.application;
 
+import com.betanalyzer.application.dto.MatchFeatureContextDTO;
 import com.betanalyzer.application.dto.SuggestionResponseDTO;
 import com.betanalyzer.application.dto.request.CreateSuggestionRequest;
 import com.betanalyzer.application.dto.request.SuggestionResultRequest;
+import com.betanalyzer.application.feature.service.FeatureCalculationService;
 import com.betanalyzer.application.mapper.BetSuggestionMapper;
 import com.betanalyzer.domain.enums.SuggestionStatus;
 import com.betanalyzer.domain.model.BetSuggestion;
@@ -35,6 +37,12 @@ class BetSuggestionServiceTest {
     @Mock
     private BetSuggestionMapper suggestionMapper;
 
+    @Mock
+    private AnalysisSnapshotService analysisSnapshotService;
+
+    @Mock
+    private FeatureCalculationService featureCalculationService;
+
     @InjectMocks
     private BetSuggestionService suggestionService;
 
@@ -54,10 +62,13 @@ class BetSuggestionServiceTest {
         responseDTO.setId(savedSuggestion.getId());
         responseDTO.setMarket("Home Win");
 
+        MatchFeatureContextDTO features = MatchFeatureContextDTO.builder().build();
+
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
         when(suggestionMapper.toEntity(request)).thenReturn(suggestion);
         when(suggestionRepository.save(any(BetSuggestion.class))).thenReturn(savedSuggestion);
         when(suggestionMapper.toResponseDTO(savedSuggestion)).thenReturn(responseDTO);
+        when(featureCalculationService.calculateOver25Features(match)).thenReturn(features);
 
         // when
         SuggestionResponseDTO result = suggestionService.createSuggestion(request);

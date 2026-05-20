@@ -1,8 +1,37 @@
 # 🎯 Sports Bet Analyzer - PROJECT CHARTER
 
 **Última Atualização:** 2026-05-20
-**Status:** 🚀 Phase 1.2 - Data Ingestion (COMPLETO)
-**Versão:** 2.2 (Completo)
+**Status:** 🚀 Phase 1.5a - Feature Layer Básica (COMPLETO)  ✅ CERTO
+**Versão:** 2.4 (Phase 1.5a concluída)
+
+AGORA (Sprint 1-2):
+├── Phase 1.5a — Feature Layer Básica (CONCLUÍDO)
+│   ├── MatchFeatureContext DTO ✅
+│   ├── Over25FeatureExtractor ✅
+│   ├── FeatureCalculationService ✅
+│   └── @Mapping em MatchStats → Features ✅
+
+DEPOIS (Sprint 3-4):
+├── Phase 1.5b — Analysis Snapshot (CONCLUÍDO) ✅
+│   ├── MatchAnalysisSnapshot (entidade nova) ✅
+│   ├── Salvar análise versionada ✅
+│   └── Auditoria de decisões ✅
+
+DEPOIS (Sprint 5-6):
+├── Phase 1.6 — Strategy Engine
+│   ├── BettingStrategy interface
+│   ├── Over25Strategy implementation
+│   ├── StrategyResult (saída padronizada)
+│   └── StrategyEvaluationService
+
+DEPOIS (Sprint 7-8):
+├── Phase 1.7 — Backtesting
+│   ├── HistoricalReplay
+│   ├── BacktestResults
+│   └── Strategy comparison
+
+DEPOIS (e aí SIM):
+├── Phase 1.4 — The Odds API
 
 ---
 

@@ -3,6 +3,8 @@ package com.betanalyzer.application;
 import com.betanalyzer.application.dto.SuggestionResponseDTO;
 import com.betanalyzer.application.dto.request.CreateSuggestionRequest;
 import com.betanalyzer.application.dto.request.SuggestionResultRequest;
+import com.betanalyzer.application.dto.MatchFeatureContextDTO;
+import com.betanalyzer.application.feature.service.FeatureCalculationService;
 import com.betanalyzer.application.mapper.BetSuggestionMapper;
 import com.betanalyzer.domain.enums.SuggestionStatus;
 import com.betanalyzer.domain.model.BetSuggestion;
@@ -37,6 +39,8 @@ public class BetSuggestionService {
     private final BetSuggestionRepository suggestionRepository;
     private final MatchRepository matchRepository;
     private final BetSuggestionMapper suggestionMapper;
+    private final AnalysisSnapshotService analysisSnapshotService;
+    private final FeatureCalculationService featureCalculationService;
 
     @Transactional(readOnly = true)
     public Page<SuggestionResponseDTO> getSuggestions(SuggestionStatus status, LocalDate date, Pageable pageable) {
@@ -67,7 +71,24 @@ public class BetSuggestionService {
 
         BetSuggestion suggestion = suggestionMapper.toEntity(request);
         suggestion.setMatch(match);
-        return suggestionMapper.toResponseDTO(suggestionRepository.save(suggestion));
+        BetSuggestion savedSuggestion = suggestionRepository.save(suggestion);
+
+        // Criar snapshot de análise
+        try {
+            MatchFeatureContextDTO features = featureCalculationService.calculateOver25Features(match);
+            analysisSnapshotService.saveAnalysisSnapshot(
+                    match.getId(),
+                    features,
+                    "OVER25_V1",
+                    request.confidence(),
+                    features.getReasoning() != null ? features.getReasoning() : "Automated analysis for " + request.market()
+            );
+        } catch (Exception e) {
+            log.error("Failed to save analysis snapshot for match: {}", match.getId(), e);
+            // Não falha a criação da sugestão se o snapshot falhar (opcional, dependendo do requisito)
+        }
+
+        return suggestionMapper.toResponseDTO(savedSuggestion);
     }
 
     @Transactional
