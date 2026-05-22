@@ -1,8 +1,8 @@
 # 🎯 Sports Bet Analyzer - PROJECT CHARTER
 
-**Última Atualização:** 2026-05-20
-**Status:** 🚀 Phase 1.4 - The Odds API Integration (REFINAMENTO CONCLUÍDO) ✅ TESTADO
-**Versão:** 2.8 (Odds Reais, Histórico, CLV e Fuzzy Matching Refinados)
+**Última Atualização:** 2026-05-22
+**Status:** 🚀 Phase 1.5 - League Filter Enrichment ✅ CONCLUÍDO
+**Versão:** 2.9 (Filtro por Liga Enriquecido com Country)
 
 ---
 

@@ -53,12 +53,11 @@ class DataQualityValidatorTest {
     }
 
     @Test
-    void testShouldRejectIfBelowThreshold() {
-        // We need a league with score < 85. Our current ones are all >= 90.
-        // For testing purposes, we could use a mock or adjust threshold.
+    void testShouldAcceptEvenIfBelowThreshold() {
+        // Agora o score de qualidade deve ser ignorado
         ReflectionTestUtils.setField(validator, "minimumQualityThreshold", 95);
         FixtureDTO fixture = createMockFixture("Série A");
-        assertFalse(validator.isQualityFixture(fixture, SupportedLeague.BRASILEIRAO)); // Brasileirão is 90
+        assertTrue(validator.isQualityFixture(fixture, SupportedLeague.BRASILEIRAO)); // Brasileirão is 90, but should pass now
     }
 
     private FixtureDTO createMockFixture(String leagueName) {

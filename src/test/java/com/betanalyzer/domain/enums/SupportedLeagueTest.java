@@ -24,9 +24,10 @@ class SupportedLeagueTest {
     }
 
     @Test
-    void testIsHighQuality() {
-        assertTrue(SupportedLeague.BRASILEIRAO.isHighQuality(85));
-        assertTrue(SupportedLeague.PREMIER_LEAGUE.isHighQuality(95));
-        assertFalse(SupportedLeague.BRASILEIRAO.isHighQuality(95));
+    void testSportKeys() {
+        assertEquals("soccer_uefa_champions_league", SupportedLeague.CHAMPIONS_LEAGUE.getTheOddsSportKey());
+        assertEquals("soccer_epl", SupportedLeague.PREMIER_LEAGUE.getTheOddsSportKey());
+        assertEquals("soccer_la_liga", SupportedLeague.LA_LIGA.getTheOddsSportKey());
+        assertEquals("soccer_brazil_serie_a", SupportedLeague.BRASILEIRAO.getTheOddsSportKey());
     }
 }

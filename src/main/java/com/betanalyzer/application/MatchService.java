@@ -23,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -104,8 +106,27 @@ public class MatchService {
 
     @Transactional(readOnly = true)
     public List<MatchResponseDTO> getMatchesByLeague(String leagueName) {
+        log.info("Fetching matches for league: {}", leagueName);
+        
+        // ← NOVO: Usar o SupportedLeague para obter o country correto
+        Optional<SupportedLeague> supportedLeague = SupportedLeague.findByApiName(leagueName);
+        
+        if (supportedLeague.isEmpty()) {
+            log.warn("League '{}' is not in SupportedLeague enum. Supported: {}", 
+                leagueName,
+                Arrays.stream(SupportedLeague.values())
+                    .map(SupportedLeague::getApiName)
+                    .collect(Collectors.joining(", ")));
+            return List.of();
+        }
+        
+        SupportedLeague league = supportedLeague.get();
+        log.info("Enriched search: League {} -> Country {}", leagueName, league.getCountry());
+        
+        // ← AGORA filtra por NOME + COUNTRY
         return matchRepository.findAll().stream()
-                .filter(m -> m.getLeague().getName().equalsIgnoreCase(leagueName))
+                .filter(m -> m.getLeague().getName().equalsIgnoreCase(leagueName) &&
+                            m.getLeague().getCountry().equalsIgnoreCase(league.getCountry()))
                 .map(matchMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }

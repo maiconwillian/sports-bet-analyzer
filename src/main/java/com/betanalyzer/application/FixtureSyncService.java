@@ -1,5 +1,6 @@
 package com.betanalyzer.application;
 
+import com.betanalyzer.domain.enums.SupportedLeague;
 import com.betanalyzer.application.dto.SyncResult;
 import com.betanalyzer.application.mapper.LeagueMapper;
 import com.betanalyzer.application.mapper.MatchMapper;
@@ -136,7 +137,10 @@ public class FixtureSyncService {
                     leagueMapper.updateEntity(leagueInfo, existing);
                     return leagueRepository.save(existing);
                 })
-                .orElseGet(() -> leagueRepository.save(leagueMapper.mapApiDtoToEntity(leagueInfo)));
+                .orElseGet(() -> {
+                    League newLeague = leagueMapper.mapApiDtoToEntity(leagueInfo);
+                    return leagueRepository.save(newLeague);
+                });
     }
 
     private Team findOrCreateTeam(FixtureDTO.TeamInfo teamInfo) {

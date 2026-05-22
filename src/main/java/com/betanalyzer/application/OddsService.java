@@ -29,6 +29,17 @@ public class OddsService {
     private final OddsRepository oddsRepository;
     private final MatchRepository matchRepository;
     private final OddsMapper oddsMapper;
+    private final OddsHistoryService oddsHistoryService;
+
+    @Transactional
+    public List<OddsResponseDTO> captureAndSaveOdds(UUID matchId) {
+        log.info("Starting odds capture for match: {}", matchId);
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + matchId));
+        
+        List<Odds> savedOdds = oddsHistoryService.captureAndSaveOdds(match);
+        return oddsMapper.toResponseDTOList(savedOdds);
+    }
 
     @Transactional(readOnly = true)
     public List<OddsResponseDTO> getOddsByMatch(UUID matchId) {

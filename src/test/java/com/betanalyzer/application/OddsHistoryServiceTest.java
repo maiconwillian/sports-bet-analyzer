@@ -1,5 +1,7 @@
 package com.betanalyzer.application;
 
+import com.betanalyzer.domain.enums.SupportedLeague;
+import com.betanalyzer.domain.model.League;
 import com.betanalyzer.domain.model.Match;
 import com.betanalyzer.domain.model.Odds;
 import com.betanalyzer.domain.model.Team;
@@ -13,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -40,32 +43,57 @@ class OddsHistoryServiceTest {
         // given
         Team homeTeam = Team.builder().name("Flamengo").build();
         Team awayTeam = Team.builder().name("Vasco").build();
+        League league = League.builder().apiId(71L).name("Série A").build();
         Match match = Match.builder()
                 .id(UUID.randomUUID())
                 .homeTeam(homeTeam)
                 .awayTeam(awayTeam)
-                .matchDate(LocalDateTime.now())
+                .league(league)
+                .matchDate(LocalDateTime.now().plusDays(1))
                 .build();
 
         TheOddsResponseDTO.OutcomeDTO outcome = new TheOddsResponseDTO.OutcomeDTO("Over", 2.5, 1.95);
         TheOddsResponseDTO.MarketDTO market = new TheOddsResponseDTO.MarketDTO("totals", List.of(outcome));
         TheOddsResponseDTO.BookmakerDTO bookmaker = new TheOddsResponseDTO.BookmakerDTO("bet365", "Bet365", List.of(market));
         TheOddsResponseDTO event = new TheOddsResponseDTO(
-                "match-1", "soccer_brazil", "Soccer", "2026-05-20T19:00:00Z",
+                "match-1", "soccer_brazil_serie_a", "Soccer", LocalDateTime.now().plusDays(1).toString(),
                 "Flamengo RJ", "Vasco da Gama", List.of(bookmaker)
         );
 
-        when(theOddsApiClient.getOddsForMatch(anyString(), any())).thenReturn(List.of(event));
-        when(oddsRepository.save(any(Odds.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(theOddsApiClient.getOddsForMatch(eq("soccer_brazil_serie_a"), any())).thenReturn(List.of(event));
 
         // when
-        List<Odds> result = oddsHistoryService.captureAndSaveOdds(match, "soccer_brazil");
+        List<Odds> result = oddsHistoryService.captureAndSaveOdds(match);
 
         // then
+        assertThat(result).isNotEmpty();
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getOddsValue()).isEqualTo(BigDecimal.valueOf(1.95));
         assertThat(result.get(0).getBookmaker()).isEqualTo("Bet365");
-        assertThat(result.get(0).getOddsValue()).isEqualByComparingTo(BigDecimal.valueOf(1.95));
-        verify(oddsRepository, times(1)).save(any(Odds.class));
+        
+        verify(oddsRepository).saveAll(anyList());
+        verify(theOddsApiClient).getOddsForMatch(eq("soccer_brazil_serie_a"), any());
+    }
+
+    @Test
+    void shouldNotCaptureOddsIfLeagueNotSupported() {
+        // given
+        Team homeTeam = Team.builder().name("Home").build();
+        Team awayTeam = Team.builder().name("Away").build();
+        League league = League.builder().apiId(999L).name("Unsupported").build();
+        Match match = Match.builder()
+                .homeTeam(homeTeam)
+                .awayTeam(awayTeam)
+                .league(league)
+                .matchDate(LocalDateTime.now().plusDays(1))
+                .build();
+
+        // when
+        List<Odds> result = oddsHistoryService.captureAndSaveOdds(match);
+
+        // then
+        assertThat(result).isEmpty();
+        verifyNoInteractions(theOddsApiClient);
     }
 
     @Test

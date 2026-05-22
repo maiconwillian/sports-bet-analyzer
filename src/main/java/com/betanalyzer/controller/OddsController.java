@@ -34,13 +34,8 @@ public class OddsController {
      * Endpoint 1: Capturar Odds Reais (The Odds API)
      */
     @PostMapping("/capture/{matchId}")
-    public ResponseEntity<List<OddsResponseDTO>> captureOdds(@PathVariable UUID matchId, 
-                                                            @RequestParam(defaultValue = "soccer_brazil") String sport) {
-        Match match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new MatchNotFoundException("Match not found: " + matchId));
-        
-        List<Odds> captured = oddsHistoryService.captureAndSaveOdds(match, sport);
-        return ResponseEntity.status(HttpStatus.CREATED).body(oddsMapper.toResponseDTOList(captured));
+    public ResponseEntity<List<OddsResponseDTO>> captureOdds(@PathVariable UUID matchId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(oddsService.captureAndSaveOdds(matchId));
     }
 
     /**
