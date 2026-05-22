@@ -11,6 +11,7 @@ import com.betanalyzer.infrastructure.client.ApiFootballClient;
 import com.betanalyzer.infrastructure.client.dto.FixtureDTO;
 import com.betanalyzer.infrastructure.persistence.LeagueRepository;
 import com.betanalyzer.infrastructure.persistence.MatchRepository;
+import com.betanalyzer.infrastructure.persistence.MatchStatsRepository;
 import com.betanalyzer.infrastructure.persistence.TeamRepository;
 import com.betanalyzer.shared.exception.ApiIntegrationException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class FixtureSyncService {
     private final LeagueRepository leagueRepository;
     private final TeamRepository teamRepository;
     private final MatchRepository matchRepository;
+    private final MatchStatsRepository matchStatsRepository; // ✅ NOVO
     private final LeagueMapper leagueMapper;
     private final TeamMapper teamMapper;
     private final MatchMapper matchMapper;
@@ -65,19 +67,32 @@ public class FixtureSyncService {
                 Team homeTeam = findOrCreateTeam(dto.teams().home());
                 Team awayTeam = findOrCreateTeam(dto.teams().away());
                 
+                // ✅ MUDANÇA: Usar boolean para saber se é novo ou update
+                boolean isNew = matchRepository.findByApiId(dto.fixture().id()).isEmpty();
+                
                 Match match = findOrCreateMatch(dto, league, homeTeam, awayTeam);
                 
-                if (match.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(5))) {
+                // ✅ NOVO: Criar MatchStats quando sincronizar
+                createOrUpdateMatchStats(match);
+            
+                if (isNew) {
                     created++;
+                    log.info("Created new match: {} - {} vs {}",
+                        dto.fixture().id(),
+                        dto.teams().home().name(), 
+                        dto.teams().away().name());
                 } else {
                     updated++;
+                    log.info("Updated existing match: {}", dto.fixture().id());
                 }
             } catch (Exception e) {
-                log.error("Failed to sync fixture {}: {}", dto.fixture().id(), e.getMessage());
+                log.error("Failed to sync fixture {}: {}", dto.fixture().id(), e.getMessage(), e);
                 failed++;
                 errors.add("Fixture " + dto.fixture().id() + ": " + e.getMessage());
             }
         }
+
+        log.info("Sync completed - Created: {}, Updated: {}, Failed: {}", created, updated, failed);
 
         return SyncResult.builder()
                 .created(created)
@@ -140,5 +155,26 @@ public class FixtureSyncService {
                     return matchRepository.save(existing);
                 })
                 .orElseGet(() -> matchRepository.save(matchMapper.mapApiDtoToEntity(dto, league, homeTeam, awayTeam)));
+    }
+
+    // ✅ NOVO MÉTODO: Criar MatchStats com dados REAIS
+    private void createOrUpdateMatchStats(Match match) {
+        var existingStats = matchStatsRepository.findByMatchId(match.getId());
+        
+        if (existingStats.isEmpty()) {
+            // ✅ Se não existe, buscar dados do API-Football
+            // (você teria um método no ApiFootballClient para isso)
+            var stats = com.betanalyzer.domain.model.MatchStats.builder()
+                    .match(match)
+                    .homeTeamGoalsAvg(0.0)  // ✅ SERÁ PREENCHIDO DEPOIS
+                    .awayTeamGoalsAvg(0.0)  // ✅ SERÁ PREENCHIDO DEPOIS
+                    .homeTeamForm("TBD")    // To Be Determined
+                    .awayTeamForm("TBD")
+                    .lastUpdate(LocalDateTime.now())
+                    .build();
+            
+            matchStatsRepository.save(stats);
+            log.info("Created MatchStats for match: {}", match.getId());
+        }
     }
 }

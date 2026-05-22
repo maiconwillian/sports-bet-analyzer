@@ -6,6 +6,7 @@ import com.betanalyzer.domain.model.MatchAnalysisSnapshot;
 import com.betanalyzer.infrastructure.persistence.MatchAnalysisSnapshotRepository;
 import com.betanalyzer.infrastructure.persistence.MatchRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,10 +49,10 @@ class AnalysisSnapshotServiceTest {
                 .build();
         
         Match match = Match.builder().id(matchId).build();
-        String featuresJson = "{\"homeTeamName\":\"Flamengo\"}";
+        JsonNode jsonNode = mock(JsonNode.class);
 
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
-        when(objectMapper.writeValueAsString(features)).thenReturn(featuresJson);
+        when(objectMapper.valueToTree(features)).thenReturn(jsonNode);
 
         // when
         snapshotService.saveAnalysisSnapshot(matchId, features, "V1", 75.0, "Reasoning");
@@ -65,9 +66,10 @@ class AnalysisSnapshotServiceTest {
         // given
         UUID matchId = UUID.randomUUID();
         String version = "V1";
+        JsonNode jsonNode = mock(JsonNode.class);
         MatchAnalysisSnapshot snapshot = MatchAnalysisSnapshot.builder()
                 .strategyVersion(version)
-                .features("json")
+                .features(jsonNode)
                 .build();
 
         when(snapshotRepository.findByMatchIdAndStrategyVersion(matchId, version))

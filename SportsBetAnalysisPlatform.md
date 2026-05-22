@@ -1,37 +1,61 @@
 # 🎯 Sports Bet Analyzer - PROJECT CHARTER
 
 **Última Atualização:** 2026-05-20
-**Status:** 🚀 Phase 1.5a - Feature Layer Básica (COMPLETO)  ✅ CERTO
-**Versão:** 2.4 (Phase 1.5a concluída)
+**Status:** 🚀 Phase 1.6 - Strategy Engine (COMPLETO) ✅ TESTADO
+**Versão:** 2.6 (Strategy Engine implementada com Records e Lógica Avançada)
+
+---
+
+## 📊 ROADMAP DE IMPLEMENTAÇÃO
+
+### ✅ CONCLUÍDO (Sprints 1-5):
 
 AGORA (Sprint 1-2):
-├── Phase 1.5a — Feature Layer Básica (CONCLUÍDO)
+├── Phase 1.5a — Feature Layer Básica ✅
 │   ├── MatchFeatureContext DTO ✅
 │   ├── Over25FeatureExtractor ✅
 │   ├── FeatureCalculationService ✅
 │   └── @Mapping em MatchStats → Features ✅
 
 DEPOIS (Sprint 3-4):
-├── Phase 1.5b — Analysis Snapshot (CONCLUÍDO) ✅
-│   ├── MatchAnalysisSnapshot (entidade nova) ✅
+├── Phase 1.5b — Analysis Snapshot ✅
+│   ├── MatchAnalysisSnapshot (entidade JSONB) ✅
+│   ├── AnalysisSnapshotService (serialização) ✅
 │   ├── Salvar análise versionada ✅
-│   └── Auditoria de decisões ✅
+│   ├── Auditoria de decisões ✅
+│   └── Testes E2E completos ✅
 
 DEPOIS (Sprint 5-6):
-├── Phase 1.6 — Strategy Engine
-│   ├── BettingStrategy interface
-│   ├── Over25Strategy implementation
-│   ├── StrategyResult (saída padronizada)
-│   └── StrategyEvaluationService
+├── Phase 1.6 — Strategy Engine ✅
+│   ├── BettingStrategy interface ✅
+│   ├── Over25Strategy implementation (Lógica Avançada) ✅
+│   ├── StrategyResult (Record Java 21) ✅
+│   ├── StrategyEvaluationService (Multi-strategy support) ✅
+│   └── Testes Unitários de Estratégia ✅
+
+---
+
+### 🔄 PRÓXIMO (Sprints 7-8):
 
 DEPOIS (Sprint 7-8):
-├── Phase 1.7 — Backtesting
-│   ├── HistoricalReplay
-│   ├── BacktestResults
-│   └── Strategy comparison
+├── Phase 1.7 — Backtesting 🔄 PRÓXIMA
+│   ├── HistoricalReplay engine
+│   ├── BacktestResults aggregation
+│   ├── Strategy comparison by ROI
+│   └── Performance metrics (Sharpe, Sortino, etc)
 
-DEPOIS (e aí SIM):
-├── Phase 1.4 — The Odds API
+DEPOIS (Sprint 9-10):
+├── Phase 1.4 — The Odds API Integration
+│   ├── Integração com The Odds API
+│   ├── CLV (Closing Line Value) calculation
+│   ├── Market movement tracking
+│   └── Odds arbitrage detection
+
+FUTURO (Phase 2+):
+├── Phase 2 — n8n Automation
+├── Phase 3 — Redis Cache + Rate Limit
+├── Phase 4 — MongoDB (Raw History)
+├── Phase 5 — Telegram Bot Notifications
 
 ---
 
@@ -135,6 +159,9 @@ Em vez de tentar analisar TUDO, **especializamos em NICHOS**:
 - `SupportedMarket` enum (com reasoning)
 - `DataQualityValidator` (filtra amistosos, ligas obscuras)
 - Cada liga tem threshold mínimo de 85 de qualidade
+
 ---
 
-## 🧱 ARQUITETURA CORE
+## 🧪 TESTES E2E (Validação Completa)
+
+### Fluxo Testado com Sucesso ✅

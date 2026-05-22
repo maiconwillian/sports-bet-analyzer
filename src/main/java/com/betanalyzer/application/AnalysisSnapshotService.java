@@ -7,6 +7,7 @@ import com.betanalyzer.infrastructure.persistence.MatchAnalysisSnapshotRepositor
 import com.betanalyzer.infrastructure.persistence.MatchRepository;
 import com.betanalyzer.shared.exception.MatchNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,6 @@ public class AnalysisSnapshotService {
     private final MatchRepository matchRepository;
     private final ObjectMapper objectMapper;
 
-    @Transactional
     public void saveAnalysisSnapshot(
             UUID matchId,
             MatchFeatureContextDTO features,
@@ -39,19 +39,20 @@ public class AnalysisSnapshotService {
                 .orElseThrow(() -> new MatchNotFoundException("Match not found with id: " + matchId));
 
         try {
-            String featuresJson = objectMapper.writeValueAsString(features);
+            // ✅ MUDANÇA: Converter para JsonNode em vez de String
+            JsonNode featuresNode = objectMapper.valueToTree(features);
 
             MatchAnalysisSnapshot snapshot = MatchAnalysisSnapshot.builder()
                     .match(match)
                     .strategyVersion(strategyVersion)
-                    .features(featuresJson)
+                    .features(featuresNode)  // ✅ JsonNode
                     .confidence(confidence)
                     .reasoning(reasoning)
                     .build();
 
             snapshotRepository.save(snapshot);
             log.info("Analysis snapshot saved successfully for match: {}", matchId);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.error("Error serializing features to JSON for match: {}", matchId, e);
             throw new RuntimeException("Error serializing analysis features", e);
         }

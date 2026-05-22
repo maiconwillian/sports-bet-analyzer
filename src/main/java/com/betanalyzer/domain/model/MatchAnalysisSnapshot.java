@@ -1,11 +1,14 @@
 package com.betanalyzer.domain.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,7 +33,8 @@ public class MatchAnalysisSnapshot {
     private String strategyVersion;
 
     @Column(columnDefinition = "jsonb", nullable = false)
-    private String features;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JsonNode features;
 
     @Column(nullable = false)
     private Double confidence;
