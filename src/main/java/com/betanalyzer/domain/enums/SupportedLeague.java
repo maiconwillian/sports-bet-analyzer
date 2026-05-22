@@ -22,10 +22,10 @@ public enum SupportedLeague {
     // PRIORITY 3: La Liga (BOM BALANCE)
     LA_LIGA(
         "La Liga", 
-        "ES", 
+        "Spain",
         95, 
         "Padrões previsíveis, bom histórico",
-        "soccer_la_liga"
+        "soccer_spain_la_liga"
     ),
     
     // PRIORITY 4: Brasileirão (SECUNDÁRIO)

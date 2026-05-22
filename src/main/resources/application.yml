@@ -22,7 +22,7 @@ spring:
 
 logging:
   level:
-    com.betanalyzer: INFO
+    com.betanalyzer: DEBUG  # ← MUDOU DE INFO PARA DEBUG
     org.flywaydb: INFO
     root: WARN
 

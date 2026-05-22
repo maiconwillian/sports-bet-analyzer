@@ -56,14 +56,66 @@ public class OddsHistoryService {
         // 3. Buscar Odds
         List<TheOddsResponseDTO> events = theOddsApiClient.getOddsForMatch(sportKey, matchDate);
 
+        log.info("=== 📊 API RETORNOU {} EVENTOS ===", events.size());
+        events.forEach(e -> log.info("  → {} vs {}", e.homeTeam(), e.awayTeam()));
+        log.info("=== 🔎 PROCURANDO POR: {} vs {} ===", match.getHomeTeam().getName(), match.getAwayTeam().getName());
+
         // 4. Filtrar eventos que combinam com os times do match
         List<Odds> capturedOdds = events.stream()
-                .filter(event -> matchesTeams(event, match.getHomeTeam().getName(), match.getAwayTeam().getName()))
-                .flatMap(event -> event.bookmakers().stream()
-                        .flatMap(bookmaker -> bookmaker.markets().stream()
-                                .flatMap(market -> market.outcomes().stream()
-                                        .map(outcome -> buildOdds(match, bookmaker, market, outcome)))))
-                .toList();
+                .peek(event -> {
+                    boolean matches = theOddsApiClient.matchesTeams(event, match.getHomeTeam().getName(), match.getAwayTeam().getName());
+                    log.info("  [{}] {} vs {} → {}", 
+                        matches ? "✓" : "✗",
+                        event.homeTeam(), 
+                        event.awayTeam(), 
+                        matches ? "MATCH!" : "no match");
+                })
+                .filter(event -> theOddsApiClient.matchesTeams(event, match.getHomeTeam().getName(), match.getAwayTeam().getName()))
+                .peek(event -> {
+            // ← NOVO DEBUG SUPER DETALHADO: Ver a estrutura completa
+            log.info("📍 ═══════════════════════════════════════════════");
+            log.info("📍 EVENTO ENCONTRADO: {} vs {}", event.homeTeam(), event.awayTeam());
+            log.info("📍 Total de bookmakers: {}", event.bookmakers().size());
+            
+            event.bookmakers().forEach((bm) -> {
+                log.info("  📊 Bookmaker: {} (key: {})", bm.title(), bm.key());
+                log.info("     Total de markets: {}", bm.markets().size());
+                
+                bm.markets().forEach(m -> {
+                    log.info("       🏷️ Market: {} (key: {})", m.key(), m.key());
+                    log.info("          Total de outcomes: {}", m.outcomes().size());
+                    
+                    m.outcomes().forEach(o -> {
+                        log.info("            🎯 Outcome: name='{}', point={}, price={}", 
+                            o.name(), 
+                            o.point() != null ? o.point() : "NULL", 
+                            o.price() != null ? o.price() : "NULL");
+                    });
+                });
+            });
+            
+            log.info("📍 ═══════════════════════════════════════════════");
+        })
+        .flatMap(event -> event.bookmakers().stream()
+                .flatMap(bookmaker -> bookmaker.markets().stream()
+                        .flatMap(market -> market.outcomes().stream()
+                                .filter(outcome -> {
+                                    boolean hasPoint = outcome.point() != null;
+                                    if (!hasPoint) {
+                                        log.debug("⏭️ SKIP: Outcome '{}' has no point (null)", outcome.name());
+                                    } else {
+                                        log.debug("✅ ACCEPT: Outcome '{}' has point={}", outcome.name(), outcome.point());
+                                    }
+                                    return hasPoint;
+                                })
+                                .map(outcome -> {
+                                    log.debug("🔧 Building Odds: {} - {} - {}", 
+                                        bookmaker.title(), market.key(), outcome.name());
+                                    return buildOdds(match, bookmaker, market, outcome);
+                                }))))
+        .toList();
+
+log.info("📦 RESULTADO FINAL: {} odds capturadas", capturedOdds.size());
 
         // 5. Salvar no BD
         if (!capturedOdds.isEmpty()) {
@@ -98,22 +150,6 @@ public class OddsHistoryService {
                         .collect(Collectors.joining(", ")));
 
         return null;
-    }
-
-    private boolean matchesTeams(TheOddsResponseDTO event, String home, String away) {
-        String eventHome = event.homeTeam().toLowerCase();
-        String eventAway = event.awayTeam().toLowerCase();
-        String targetHome = home.toLowerCase();
-        String targetAway = away.toLowerCase();
-
-        // Exact match
-        if (eventHome.equals(targetHome) && eventAway.equals(targetAway)) return true;
-
-        // Fuzzy matching simples (contém o primeiro nome)
-        String firstWordHome = targetHome.split(" ")[0];
-        String firstWordAway = targetAway.split(" ")[0];
-
-        return (eventHome.contains(firstWordHome) && eventAway.contains(firstWordAway));
     }
 
     private Odds buildOdds(Match match, TheOddsResponseDTO.BookmakerDTO bookmaker, 

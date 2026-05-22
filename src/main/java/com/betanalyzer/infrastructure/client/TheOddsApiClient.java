@@ -42,6 +42,7 @@ public class TheOddsApiClient {
                             .path("/sports/{sport}/odds")
                             .queryParam("apiKey", properties.getKey())
                             .queryParam("regions", "us")  // ← OBRIGATÓRIO!
+                            .queryParam("markets", "totals")
                             .queryParam("dateFormat", "iso")
                             .build(sport)
                     )
@@ -125,8 +126,70 @@ public class TheOddsApiClient {
                 .orElse(null);
     }
 
-    private boolean matchesTeams(TheOddsResponseDTO event, String home, String away) {
-        return (event.homeTeam().equalsIgnoreCase(home) && event.awayTeam().equalsIgnoreCase(away)) ||
-               (event.homeTeam().contains(home.split(" ")[0]) && event.awayTeam().contains(away.split(" ")[0]));
+    public boolean matchesTeams(TheOddsResponseDTO event, String home, String away) {
+        String eventHome = normalizeTeamName(event.homeTeam());
+        String eventAway = normalizeTeamName(event.awayTeam());
+        String targetHome = normalizeTeamName(home);
+        String targetAway = normalizeTeamName(away);
+
+        // Exact match
+        if (eventHome.equals(targetHome) && eventAway.equals(targetAway)) {
+            return true;
+        }
+
+        // Reverse check (times podem estar invertidos)
+        if (eventHome.equals(targetAway) && eventAway.equals(targetHome)) {
+            return true;
+        }
+
+        // Fuzzy: primeiras palavras + levenshtein distance
+        String[] targetHomeWords = targetHome.split(" ");
+        String[] targetAwayWords = targetAway.split(" ");
+
+        String firstWordHome = targetHomeWords[0];
+        String firstWordAway = targetAwayWords[0];
+
+        boolean homeMatch = eventHome.contains(firstWordHome) || levenshteinDistance(eventHome, firstWordHome) <= 2;
+        boolean awayMatch = eventAway.contains(firstWordAway) || levenshteinDistance(eventAway, firstWordAway) <= 2;
+
+        return homeMatch && awayMatch;
+    }
+
+    /**
+     * Normaliza nome do time: remove acentos, espaços, lowercase
+     */
+    private String normalizeTeamName(String name) {
+        if (name == null) return "";
+
+        return name
+                .toLowerCase()
+                .trim()
+                // Remove acentos: é, á, ã, etc
+                .replaceAll("[áàâãä]", "a")
+                .replaceAll("[éèêë]", "e")
+                .replaceAll("[íìîï]", "i")
+                .replaceAll("[óòôõö]", "o")
+                .replaceAll("[úùûü]", "u")
+                .replaceAll("[ç]", "c");
+    }
+
+    /**
+     * Levenshtein Distance: mede diferença entre strings
+     * Útil para typos: "Alavés" vs "Alaves"
+     */
+    private int levenshteinDistance(String a, String b) {
+        int[][] dp = new int[a.length() + 1][b.length() + 1];
+
+        for (int i = 0; i <= a.length(); i++) dp[i][0] = i;
+        for (int j = 0; j <= b.length(); j++) dp[0][j] = j;
+
+        for (int i = 1; i <= a.length(); i++) {
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                dp[i][j] = Math.min(Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1), dp[i-1][j-1] + cost);
+            }
+        }
+
+        return dp[a.length()][b.length()];
     }
 }

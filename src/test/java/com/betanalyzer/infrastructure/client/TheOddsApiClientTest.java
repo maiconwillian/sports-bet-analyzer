@@ -42,6 +42,7 @@ class TheOddsApiClientTest {
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(any(java.util.function.Function.class))).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
 
         theOddsApiClient = new TheOddsApiClient(webClient, properties);
     }

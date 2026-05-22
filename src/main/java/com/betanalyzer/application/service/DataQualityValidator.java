@@ -33,8 +33,8 @@ public class DataQualityValidator {
 
     public boolean isQualityFixture(FixtureDTO fixture, SupportedLeague league) {
         try {
-            // validateLeague(league);
-            // validateDataQualityScore(league);
+            validateLeague(league);
+            validateDataQualityScore(league);
             validateNotFriendly(fixture);
             validateNotPreSeason(fixture);
             validateNotObscureOrStateLeague(fixture);
@@ -49,8 +49,8 @@ public class DataQualityValidator {
     public boolean isQualityFixture(Match match, SupportedLeague league) {
         // Overloaded method for Match entity if needed, though most filtering happens at DTO level
         try {
-            // validateLeague(league);
-            // validateDataQualityScore(league);
+             validateLeague(league);
+             validateDataQualityScore(league);
             // Additional checks on Match entity if needed
             return true;
         } catch (DataQualityException e) {
