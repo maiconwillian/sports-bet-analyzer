@@ -1,14 +1,14 @@
 # 🎯 Sports Bet Analyzer - PROJECT CHARTER
 
 **Última Atualização:** 2026-05-22
-**Status:** 🚀 Phase 1.5 - League Filter Enrichment ✅ CONCLUÍDO
-**Versão:** 2.9 (Filtro por Liga Enriquecido com Country)
+**Status:** ✅ Phase 1.7 - Backtesting Engine CONCLUÍDO
+**Versão:** 3.1 (Backtesting Engine Implemented)
 
 ---
 
 ## 📊 ROADMAP DE IMPLEMENTAÇÃO
 
-### ✅ CONCLUÍDO (Sprints 1-5):
+### ✅ CONCLUÍDO (Sprints 1-9):
 
 AGORA (Sprint 1-2):
 ├── Phase 1.5a — Feature Layer Básica ✅
@@ -42,22 +42,25 @@ DEPOIS (Sprint 6-7):
 │   ├── Consolidação de OddsController ✅
 │   └── Testes Unitários Completos ✅
 
+DEPOIS (Sprint 8-9):
+├── Phase 1.7 — Backtesting Engine ✅
+│   ├── HistoricalReplay engine ✅
+│   ├── BacktestResults aggregation ✅
+│   ├── Strategy comparison by ROI ✅
+│   ├── Performance metrics (ROI, Winrate, Max Drawdown) ✅
+│   ├── Fixed stake simulation ✅
+│   ├── Data leakage prevention ✅
+│   ├── Cálculos de médias ignorando nulos ✅
+│   └── Testes Unitários Completos ✅
+
 ---
 
-### 🔄 PRÓXIMO (Sprints 8-9):
+### 🔄 EM ANDAMENTO (Sprint 10):
 
-DEPOIS (Sprint 8-9):
-├── Phase 1.7 — Backtesting 🔄 PRÓXIMA
-│   ├── HistoricalReplay engine
-│   ├── BacktestResults aggregation
-│   ├── Strategy comparison by ROI
-│   ├── Performance metrics (Sharpe, Sortino, etc)
-│   └── Com dados REAIS (Resultado confiável)
-
-DEPOIS (Sprint 9-10):
-├── Phase 1.5c — Value Bet Detection
+AGORA (Sprint 10):
+├── Phase 1.5c — Value Bet Detection 🔄
 │   ├── Detectar bets com EV+
-│   ├── Comparar sua prob vs mercado
+│   ├── Comparar sua probabilidade vs mercado
 │   └── Ajuste Kelly Criterion
 
 FUTURO (Phase 2+):
@@ -67,6 +70,69 @@ FUTURO (Phase 2+):
 ├── Phase 5 — Telegram Bot Notifications
 
 ---
+
+## 🔥 PHASE 1.7 — BACKTESTING ENGINE ✅ CONCLUÍDO
+
+### Objetivo da Phase 1.7 (Concluído)
+
+A ideia da Phase 1.7 foi responder uma pergunta simples:
+
+> “Se eu tivesse executado minha estratégia no passado, ela teria gerado lucro de forma consistente?”
+
+O objetivo **não** é prever jogos magicamente.
+
+O objetivo é:
+
+* validar edge matemático;
+* medir ROI;
+* validar EV+;
+* medir consistência;
+* detectar overfitting;
+* comparar estratégias;
+* provar estatisticamente se existe vantagem real.
+
+---
+
+## 🎯 Objetivo Técnico
+
+Criar um motor de replay histórico que:
+
+* busca partidas históricas finalizadas;
+* reconstrói o contexto histórico da partida;
+* recalcula features;
+* executa estratégias;
+* simula apostas;
+* calcula métricas quantitativas;
+* gera relatórios completos de performance.
+
+---
+
+## ⚠️ Regra Mais Importante do Backtest
+
+### 🚨 Evitar Data Leakage
+
+O backtesting deve utilizar apenas dados disponíveis **antes da partida acontecer**.
+
+Nunca utilizar:
+
+* estatísticas pós-jogo;
+* odds futuras;
+* odds de fechamento se ainda não existiam no momento da decisão;
+* features recalculadas após o resultado;
+* qualquer dado contaminado pelo resultado final.
+
+O sistema deve reconstruir o cenário exatamente como existia antes da partida.
+
+Isso é o que separa:
+
+* backtest real;
+* backtest mentiroso.
+
+---
+
+## 🧱 Escopo da Primeira Versão
+
+A primeira versão da Phase 1.7 deve focar somente em:
 
 ## 📌 VISÃO
 
@@ -174,3 +240,13 @@ Em vez de tentar analisar TUDO, **especializamos em NICHOS**:
 ## 🧪 TESTES E2E (Validação Completa)
 
 ### Fluxo Testado com Sucesso ✅
+
+1. **Phase 1.7 (Backtesting):** Validação de métricas (ROI, Winrate, Max Drawdown) com `MetricsCalculationServiceTest` ✅
+2. **Phase 1.7 (Backtesting):** Validação de inputs e prevenção de data leakage (regras de negócio no `BacktestingService`) ✅
+
+---
+
+## ⚠️ LIMITAÇÕES TÉCNICAS ATUAIS (Dívida Técnica Consciente)
+
+* **Data Leakage:** O `FeatureCalculationService` utiliza `MatchStats`. Para um backtest 100% puro, o `MatchStats` deve representar o estado do time *antes* da partida. Atualmente, o sistema assume que o processo de ingestão de dados garante que `MatchStats` não contém informações pós-jogo ao ser consumido pelo motor de backtest.
+* **Simulation Mode:** Apenas `FIXED_STAKE` é suportado. `PERCENTAGE_BANKROLL` planejado para futuras fases.
