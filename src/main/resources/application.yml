@@ -36,6 +36,11 @@ api:
     host: v3.football.api-sports.io
     connect-timeout-ms: 5000
     read-timeout-ms: 10000
+  odds:
+    base-url: https://api.the-odds-api.com/v4
+    key: 63d7269ab5b2546f054a5c621e7570bb
+    connect-timeout-ms: 5000
+    read-timeout-ms: 10000
 
 app:
   data-quality:

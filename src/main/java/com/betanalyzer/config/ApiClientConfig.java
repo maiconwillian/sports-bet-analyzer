@@ -36,13 +36,29 @@ public class ApiClientConfig {
     private long readTimeoutMs;
 
     @Bean
-    public WebClient webClient() {
-        // Aumentar buffer size para 2MB (padrão é 256KB)
+    public WebClient footballWebClient(
+            @Value("${api.football.base-url}") String baseUrl,
+            @Value("${api.football.key}") String apiKey,
+            @Value("${api.football.host}") String apiHost,
+            @Value("${api.football.connect-timeout-ms:5000}") long connectTimeoutMs,
+            @Value("${api.football.read-timeout-ms:10000}") long readTimeoutMs) {
+        return createWebClient(baseUrl, connectTimeoutMs, readTimeoutMs)
+                .mutate()
+                .defaultHeader("x-apisports-key", apiKey)
+                .defaultHeader("x-rapidapi-host", apiHost)
+                .build();
+    }
+
+    @Bean
+    public WebClient oddsWebClient(TheOddsApiProperties properties) {
+        return createWebClient(properties.getBaseUrl(), properties.getConnectTimeoutMs(), properties.getReadTimeoutMs());
+    }
+
+    private WebClient createWebClient(String baseUrl, long connectTimeoutMs, long readTimeoutMs) {
         ExchangeStrategies strategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))
                 .build();
 
-        // Configurar timeouts e outras opções do Netty
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) connectTimeoutMs)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -56,8 +72,6 @@ public class ApiClientConfig {
                 .baseUrl(baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(strategies)
-                .defaultHeader("x-apisports-key", apiKey)
-                .defaultHeader("x-rapidapi-host", apiHost)
                 .build();
     }
 

@@ -20,9 +20,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ApiFootballClient {
     
+    @org.springframework.beans.factory.annotation.Qualifier("footballWebClient")
     private final WebClient webClient;
     private final DataQualityValidator dataQualityValidator;
-    
+
     /**
      * Busca todos os jogos de uma data específica
      * @param date Data no formato YYYY-MM-DD

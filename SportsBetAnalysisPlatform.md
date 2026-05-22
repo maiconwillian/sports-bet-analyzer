@@ -1,8 +1,8 @@
 # 🎯 Sports Bet Analyzer - PROJECT CHARTER
 
 **Última Atualização:** 2026-05-20
-**Status:** 🚀 Phase 1.6 - Strategy Engine (COMPLETO) ✅ TESTADO
-**Versão:** 2.6 (Strategy Engine implementada com Records e Lógica Avançada)
+**Status:** 🚀 Phase 1.4 - The Odds API Integration (REFINAMENTO CONCLUÍDO) ✅ TESTADO
+**Versão:** 2.8 (Odds Reais, Histórico, CLV e Fuzzy Matching Refinados)
 
 ---
 
@@ -33,23 +33,32 @@ DEPOIS (Sprint 5-6):
 │   ├── StrategyEvaluationService (Multi-strategy support) ✅
 │   └── Testes Unitários de Estratégia ✅
 
+DEPOIS (Sprint 6-7):
+├── Phase 1.4 — The Odds API Integration ✅
+│   ├── Integração com The Odds API ✅
+│   ├── Capturar odds reais ✅
+│   ├── Salvar histórico ✅
+│   ├── CLV (Closing Line Value) calculation ✅
+│   ├── Consolidação de OddsController ✅
+│   └── Testes Unitários Completos ✅
+
 ---
 
-### 🔄 PRÓXIMO (Sprints 7-8):
+### 🔄 PRÓXIMO (Sprints 8-9):
 
-DEPOIS (Sprint 7-8):
+DEPOIS (Sprint 8-9):
 ├── Phase 1.7 — Backtesting 🔄 PRÓXIMA
 │   ├── HistoricalReplay engine
 │   ├── BacktestResults aggregation
 │   ├── Strategy comparison by ROI
-│   └── Performance metrics (Sharpe, Sortino, etc)
+│   ├── Performance metrics (Sharpe, Sortino, etc)
+│   └── Com dados REAIS (Resultado confiável)
 
 DEPOIS (Sprint 9-10):
-├── Phase 1.4 — The Odds API Integration
-│   ├── Integração com The Odds API
-│   ├── CLV (Closing Line Value) calculation
-│   ├── Market movement tracking
-│   └── Odds arbitrage detection
+├── Phase 1.5c — Value Bet Detection
+│   ├── Detectar bets com EV+
+│   ├── Comparar sua prob vs mercado
+│   └── Ajuste Kelly Criterion
 
 FUTURO (Phase 2+):
 ├── Phase 2 — n8n Automation

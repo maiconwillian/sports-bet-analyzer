@@ -30,14 +30,19 @@ public class Odds {
     @Column(nullable = false)
     private String bookmaker;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = true, precision = 10, scale = 2)
     private BigDecimal homeWinOdd;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = true, precision = 10, scale = 2)
     private BigDecimal drawOdd;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = true, precision = 10, scale = 2)
     private BigDecimal awayWinOdd;
+
+    private String market;           // "OVER_2_5", "UNDER_2_5", etc
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal oddsValue;        // A odd real (ex: 1.95)
+    private String bookmakerKey;     // "bet365", "betano", etc
 
     @Column(nullable = false)
     private LocalDateTime capturedAt;

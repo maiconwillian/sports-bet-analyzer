@@ -48,9 +48,16 @@ class OddsServiceTest {
         Odds odds = Odds.builder().bookmaker("Bet365").build();
         Odds savedOdds = Odds.builder().id(UUID.randomUUID()).match(match).bookmaker("Bet365").build();
         
-        OddsResponseDTO responseDTO = new OddsResponseDTO();
-        responseDTO.setId(savedOdds.getId());
-        responseDTO.setBookmaker("Bet365");
+        OddsResponseDTO responseDTO = new OddsResponseDTO(
+                savedOdds.getId(),
+                matchId,
+                "Bet365",
+                "bet365",
+                "hda",
+                new BigDecimal("2.10"),
+                null,
+                null
+        );
 
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
         when(oddsMapper.toEntity(request)).thenReturn(odds);
@@ -62,6 +69,6 @@ class OddsServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.getBookmaker()).isEqualTo("Bet365");
+        assertThat(result.bookmaker()).isEqualTo("Bet365");
     }
 }

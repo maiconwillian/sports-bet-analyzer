@@ -10,6 +10,10 @@ import java.util.UUID;
 
 @Repository
 public interface OddsRepository extends JpaRepository<Odds, UUID> {
+    List<Odds> findByMatchIdOrderByCapturedAtDesc(UUID matchId);
+    Optional<Odds> findByMatchIdAndBookmakerKeyAndMarket(UUID matchId, String key, String market);
+    List<Odds> findByMarket(String market);
+
     List<Odds> findByMatchId(UUID matchId);
     Optional<Odds> findFirstByMatchIdOrderByCapturedAtDesc(UUID matchId);
     List<Odds> findByBookmaker(String bookmaker);
