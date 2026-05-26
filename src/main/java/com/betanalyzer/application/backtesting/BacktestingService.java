@@ -5,6 +5,7 @@ import com.betanalyzer.application.dto.backtesting.BacktestRequest;
 import com.betanalyzer.application.dto.backtesting.BacktestResultDTO;
 import com.betanalyzer.domain.model.League;
 import com.betanalyzer.domain.model.Match;
+import com.betanalyzer.config.BacktestProperties;
 import com.betanalyzer.infrastructure.persistence.LeagueRepository;
 import com.betanalyzer.infrastructure.persistence.MatchRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class BacktestingService {
     private final LeagueRepository leagueRepository;
     private final HistoricalReplayService historicalReplayService;
     private final MetricsCalculationService metricsCalculationService;
+    private final BacktestProperties backtestProperties;
 
     public BacktestResultDTO runBacktest(BacktestRequest request) {
         if (request.getStartDate().isAfter(request.getEndDate())) {
@@ -72,10 +74,14 @@ public class BacktestingService {
         }
 
         // 4. Calcular Métricas Finais
-        return metricsCalculationService.calculate(
-                request.getStrategyVersion(), 
-                matchesAnalyzed, 
+        BacktestResultDTO result = metricsCalculationService.calculate(
+                request.getStrategyVersion(),
+                matchesAnalyzed,
                 betResults
         );
+        int minSample = backtestProperties.getMinSampleBets();
+        result.setMinSampleBets(minSample);
+        result.setLowSample(result.getBetsPlaced() < minSample);
+        return result;
     }
 }

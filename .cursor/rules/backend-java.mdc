@@ -1,0 +1,43 @@
+---
+description: Convenções Java/Spring Boot do OddWise backend
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# OddWise — Backend Java
+
+## Arquitetura
+
+Clean Architecture: `controller` → `application` → `domain` → `infrastructure`.
+
+- Controllers finos: validação de entrada, delegar para services
+- Regras de negócio em `application` ou `domain`, não em controllers
+- Entidades JPA não expostas na API — usar DTOs + MapStruct
+
+## Padrões do projeto
+
+- Java 21 (records onde fizer sentido)
+- Lombok para boilerplate; MapStruct para mappers
+- Exceções de negócio: `BusinessLogicException` com HTTP adequado
+- Flyway para schema — não usar `ddl-auto: create`
+
+## Domínio crítico
+
+- `SupportedLeague.matches(name, country)` — nunca mapear liga só pelo nome
+- Odds: validar liga suportada antes de capturar (400, não 201 vazio)
+- Sugestões: resultado via `actualResult` (WIN/LOSS/VOID)
+- Backtest: apenas `FIXED_STAKE` na V1
+
+## Testes
+
+- Testes unitários para regras de negócio (`SupportedLeague`, odds, league filter, backtesting)
+- Mockar clients externos (API-Football, The Odds API)
+
+## Segurança
+
+- Keys em variáveis de ambiente / `.env` (gitignored)
+- Não hardcodar secrets em `application.yml` para produção
+
+## Referência
+
+Ver `SportsBetAnalysisPlatform.md` e `DECISIONS.md` para decisões arquiteturais.

@@ -1,6 +1,7 @@
 package com.betanalyzer.controller;
 
 import com.betanalyzer.application.BetSuggestionService;
+import com.betanalyzer.application.dto.SettlePendingResultDTO;
 import com.betanalyzer.application.dto.SuggestionResponseDTO;
 import com.betanalyzer.application.dto.request.CreateSuggestionRequest;
 import com.betanalyzer.application.dto.request.SuggestionResultRequest;
@@ -53,5 +54,10 @@ public class SuggestionController {
     @GetMapping("/match/{matchId}")
     public ResponseEntity<List<SuggestionResponseDTO>> getSuggestionsByMatch(@PathVariable UUID matchId) {
         return ResponseEntity.ok(suggestionService.getSuggestionsByMatch(matchId));
+    }
+
+    @PostMapping("/settle-pending")
+    public ResponseEntity<SettlePendingResultDTO> settlePending() {
+        return ResponseEntity.ok(suggestionService.settlePendingSuggestions());
     }
 }

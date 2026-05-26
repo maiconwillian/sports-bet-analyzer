@@ -28,4 +28,6 @@ public class BacktestResultDTO {
     private double averageCLV;
     private double profitFactor;
     private List<BacktestBetResultDTO> bets;
+    private boolean lowSample;
+    private int minSampleBets;
 }

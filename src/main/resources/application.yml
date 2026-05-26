@@ -62,3 +62,10 @@ app:
     supported-markets:
       - OVER_2_5
       - BTTS
+  value-bet:
+    min-ev: 0.05
+    min-confidence: 65.0
+    kelly-fraction: 0.25
+    bankroll: 1000.0
+  backtest:
+    min-sample-bets: 30

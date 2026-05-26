@@ -1,0 +1,41 @@
+---
+description: Visão de produto OddWise — sempre aplicar em conversas do backend
+alwaysApply: true
+---
+
+# OddWise — Contexto de Produto (Backend)
+
+## O que é
+
+**OddWise** (Sports Bet Analyzer): plataforma quantitativa de apostas esportivas. Mercado operacional Phase 1: **Over 2.5 Goals**. Alvo: **agente multi-mercado** (jogo + mercado + parecer) — ver `PRODUCT_VISION_AGENT.md`.
+
+## Estado atual (maio/2026)
+
+- Backend Java 21 + Spring Boot + PostgreSQL local (`:8080`)
+- Frontend: `oddwise-frontend` (`:5173`, proxy `/api`)
+- 6 ligas `SupportedLeague` (nome + país) · sync filtra homônimos
+- The Odds API · Value bets 1.5c · liquidação Over 2.5 pós-sync
+- `MatchStats` pós-sync ainda **placeholder** (0/TBD) → EV+ vazio até **1.75**
+- Sugestões **manuais** via UI
+
+## Próximo (ordem)
+
+1.75 Match Intelligence → 1.76 multi-market → 1.77 picks → 1.8 propostas → 1.85 MCP/agente → 2.0 n8n
+
+## Non-goals (até 1.85)
+
+- Agente/LLM antes de stats reais e pick engine
+- Multi-mercado sem backtest por mercado
+- Auto-aposta sem revisão humana
+
+## Filosofia
+
+EV+ > winrate · backtest antes de escalar · narrow-and-deep · backend = fonte da verdade (MCP só tools).
+
+## Documentação
+
+- `SportsBetAnalysisPlatform.md` · `PRODUCT_VISION_AGENT.md` · `DECISIONS.md` · `OPERATIONS.md`
+
+## Instrução ao agente
+
+Considerar EV+, backtest e narrow-and-deep. Não sugerir LLM antes de 1.75. Nunca expor secrets. Clean Architecture + testes em regras de negócio.

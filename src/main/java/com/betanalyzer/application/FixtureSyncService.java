@@ -1,10 +1,12 @@
 package com.betanalyzer.application;
 
-import com.betanalyzer.domain.enums.SupportedLeague;
+import com.betanalyzer.application.dto.SettlePendingResultDTO;
 import com.betanalyzer.application.dto.SyncResult;
 import com.betanalyzer.application.mapper.LeagueMapper;
 import com.betanalyzer.application.mapper.MatchMapper;
 import com.betanalyzer.application.mapper.TeamMapper;
+import com.betanalyzer.application.service.DataQualityValidator;
+import com.betanalyzer.domain.enums.SupportedLeague;
 import com.betanalyzer.domain.model.League;
 import com.betanalyzer.domain.model.Match;
 import com.betanalyzer.domain.model.Team;
@@ -14,7 +16,6 @@ import com.betanalyzer.infrastructure.persistence.LeagueRepository;
 import com.betanalyzer.infrastructure.persistence.MatchRepository;
 import com.betanalyzer.infrastructure.persistence.MatchStatsRepository;
 import com.betanalyzer.infrastructure.persistence.TeamRepository;
-import com.betanalyzer.shared.exception.ApiIntegrationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +36,13 @@ public class FixtureSyncService {
     private final LeagueRepository leagueRepository;
     private final TeamRepository teamRepository;
     private final MatchRepository matchRepository;
-    private final MatchStatsRepository matchStatsRepository; // ✅ NOVO
+    private final MatchStatsRepository matchStatsRepository;
     private final LeagueMapper leagueMapper;
     private final TeamMapper teamMapper;
     private final MatchMapper matchMapper;
     private final MatchSyncValidator validator;
+    private final SuggestionSettlementService suggestionSettlementService;
+    private final DataQualityValidator dataQualityValidator;
 
     @Transactional
     public SyncResult syncFixturesByDate(LocalDate date) {
@@ -55,79 +59,118 @@ public class FixtureSyncService {
                     .build();
         }
 
-        int created = 0;
-        int updated = 0;
-        int failed = 0;
-        List<String> errors = new ArrayList<>();
+        SyncCounters counters = processFixtures(fixtures);
+        log.info("Sync completed - Created: {}, Updated: {}, Failed: {}, Skipped unsupported: {}, Skipped quality: {}",
+                counters.created, counters.updated, counters.failed,
+                counters.skippedUnsupported, counters.skippedQuality);
 
-        for (FixtureDTO dto : fixtures) {
-            try {
-                validator.validateFixtureDTO(dto);
-                
-                League league = findOrCreateLeague(dto.league());
-                Team homeTeam = findOrCreateTeam(dto.teams().home());
-                Team awayTeam = findOrCreateTeam(dto.teams().away());
-                
-                // ✅ MUDANÇA: Usar boolean para saber se é novo ou update
-                boolean isNew = matchRepository.findByApiId(dto.fixture().id()).isEmpty();
-                
-                Match match = findOrCreateMatch(dto, league, homeTeam, awayTeam);
-                
-                // ✅ NOVO: Criar MatchStats quando sincronizar
-                createOrUpdateMatchStats(match);
-            
-                if (isNew) {
-                    created++;
-                    log.info("Created new match: {} - {} vs {}",
-                        dto.fixture().id(),
-                        dto.teams().home().name(), 
-                        dto.teams().away().name());
-                } else {
-                    updated++;
-                    log.info("Updated existing match: {}", dto.fixture().id());
-                }
-            } catch (Exception e) {
-                log.error("Failed to sync fixture {}: {}", dto.fixture().id(), e.getMessage(), e);
-                failed++;
-                errors.add("Fixture " + dto.fixture().id() + ": " + e.getMessage());
-            }
-        }
-
-        log.info("Sync completed - Created: {}, Updated: {}, Failed: {}", created, updated, failed);
-
-        return SyncResult.builder()
-                .created(created)
-                .updated(updated)
-                .failed(failed)
-                .errors(errors)
-                .syncedAt(LocalDateTime.now())
-                .build();
+        return buildSyncResult(counters);
     }
 
     @Transactional
     public SyncResult syncFixturesByDateRange(LocalDate start, LocalDate end) {
         log.info("Starting sync for range: {} to {}", start, end);
-        int totalCreated = 0;
-        int totalUpdated = 0;
-        int totalFailed = 0;
-        List<String> totalErrors = new ArrayList<>();
+        SyncCounters total = new SyncCounters();
 
         LocalDate current = start;
         while (!current.isAfter(end)) {
             SyncResult result = syncFixturesByDate(current);
-            totalCreated += result.getCreated();
-            totalUpdated += result.getUpdated();
-            totalFailed += result.getFailed();
-            totalErrors.addAll(result.getErrors());
+            total.created += result.getCreated();
+            total.updated += result.getUpdated();
+            total.failed += result.getFailed();
+            total.skippedUnsupported += result.getSkippedUnsupported();
+            total.skippedQuality += result.getSkippedQuality();
+            if (result.getErrors() != null) {
+                total.errors.addAll(result.getErrors());
+            }
             current = current.plusDays(1);
         }
 
+        return buildSyncResult(total);
+    }
+
+    private SyncCounters processFixtures(List<FixtureDTO> fixtures) {
+        SyncCounters counters = new SyncCounters();
+
+        for (FixtureDTO dto : fixtures) {
+            try {
+                validator.validateFixtureDTO(dto);
+
+                Optional<SupportedLeague> supported = SupportedLeague.findByLeague(
+                        dto.league().name(),
+                        dto.league().country()
+                );
+                if (supported.isEmpty()) {
+                    counters.skippedUnsupported++;
+                    log.debug("Skipping unsupported league: {} ({})",
+                            dto.league().name(), dto.league().country());
+                    continue;
+                }
+
+                if (!dataQualityValidator.isQualityFixture(dto, supported.get())) {
+                    counters.skippedQuality++;
+                    log.debug("Skipping low-quality fixture: {} ({})",
+                            dto.league().name(), dto.league().country());
+                    continue;
+                }
+
+                League league = findOrCreateLeague(dto.league());
+                Team homeTeam = findOrCreateTeam(dto.teams().home());
+                Team awayTeam = findOrCreateTeam(dto.teams().away());
+
+                boolean isNew = matchRepository.findByApiId(dto.fixture().id()).isEmpty();
+
+                Match match = findOrCreateMatch(dto, league, homeTeam, awayTeam);
+                createOrUpdateMatchStats(match);
+
+                if (isNew) {
+                    counters.created++;
+                    log.info("Created new match: {} - {} vs {}",
+                            dto.fixture().id(),
+                            dto.teams().home().name(),
+                            dto.teams().away().name());
+                } else {
+                    counters.updated++;
+                    log.info("Updated existing match: {}", dto.fixture().id());
+                }
+            } catch (Exception e) {
+                log.error("Failed to sync fixture {}: {}", dto.fixture().id(), e.getMessage(), e);
+                counters.failed++;
+                counters.errors.add("Fixture " + dto.fixture().id() + ": " + e.getMessage());
+            }
+        }
+
+        return counters;
+    }
+
+    private SyncResult buildSyncResult(SyncCounters counters) {
+        SettlePendingResultDTO settlement = suggestionSettlementService.settlePendingSuggestions();
+        String message = String.format(
+                "Sync OK — %d criadas, %d atualizadas, %d ignoradas (liga não suportada), %d ignoradas (qualidade). "
+                        + "Liquidação: %d sugestões (%d ganhas, %d perdidas, %d void).",
+                counters.created,
+                counters.updated,
+                counters.skippedUnsupported,
+                counters.skippedQuality,
+                settlement.getSettled(),
+                settlement.getWon(),
+                settlement.getLost(),
+                settlement.getVoided()
+        );
         return SyncResult.builder()
-                .created(totalCreated)
-                .updated(totalUpdated)
-                .failed(totalFailed)
-                .errors(totalErrors)
+                .created(counters.created)
+                .updated(counters.updated)
+                .failed(counters.failed)
+                .skippedUnsupported(counters.skippedUnsupported)
+                .skippedQuality(counters.skippedQuality)
+                .errors(counters.errors)
                 .syncedAt(LocalDateTime.now())
+                .message(message)
+                .settled(settlement.getSettled())
+                .won(settlement.getWon())
+                .lost(settlement.getLost())
+                .voided(settlement.getVoided())
+                .skippedSettlement(settlement.getSkipped())
                 .build();
     }
 
@@ -137,10 +180,7 @@ public class FixtureSyncService {
                     leagueMapper.updateEntity(leagueInfo, existing);
                     return leagueRepository.save(existing);
                 })
-                .orElseGet(() -> {
-                    League newLeague = leagueMapper.mapApiDtoToEntity(leagueInfo);
-                    return leagueRepository.save(newLeague);
-                });
+                .orElseGet(() -> leagueRepository.save(leagueMapper.mapApiDtoToEntity(leagueInfo)));
     }
 
     private Team findOrCreateTeam(FixtureDTO.TeamInfo teamInfo) {
@@ -161,24 +201,30 @@ public class FixtureSyncService {
                 .orElseGet(() -> matchRepository.save(matchMapper.mapApiDtoToEntity(dto, league, homeTeam, awayTeam)));
     }
 
-    // ✅ NOVO MÉTODO: Criar MatchStats com dados REAIS
     private void createOrUpdateMatchStats(Match match) {
         var existingStats = matchStatsRepository.findByMatchId(match.getId());
-        
+
         if (existingStats.isEmpty()) {
-            // ✅ Se não existe, buscar dados do API-Football
-            // (você teria um método no ApiFootballClient para isso)
             var stats = com.betanalyzer.domain.model.MatchStats.builder()
                     .match(match)
-                    .homeTeamGoalsAvg(0.0)  // ✅ SERÁ PREENCHIDO DEPOIS
-                    .awayTeamGoalsAvg(0.0)  // ✅ SERÁ PREENCHIDO DEPOIS
-                    .homeTeamForm("TBD")    // To Be Determined
+                    .homeTeamGoalsAvg(0.0)
+                    .awayTeamGoalsAvg(0.0)
+                    .homeTeamForm("TBD")
                     .awayTeamForm("TBD")
                     .lastUpdate(LocalDateTime.now())
                     .build();
-            
+
             matchStatsRepository.save(stats);
             log.info("Created MatchStats for match: {}", match.getId());
         }
+    }
+
+    private static final class SyncCounters {
+        int created;
+        int updated;
+        int failed;
+        int skippedUnsupported;
+        int skippedQuality;
+        final List<String> errors = new ArrayList<>();
     }
 }

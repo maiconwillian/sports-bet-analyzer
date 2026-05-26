@@ -100,6 +100,8 @@ public class MatchService {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
         return matchRepository.findByMatchDateBetween(startOfDay, endOfDay).stream()
+                .filter(m -> SupportedLeague.findByLeague(
+                        m.getLeague().getName(), m.getLeague().getCountry()).isPresent())
                 .map(matchMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }

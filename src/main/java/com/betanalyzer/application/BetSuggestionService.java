@@ -1,5 +1,6 @@
 package com.betanalyzer.application;
 
+import com.betanalyzer.application.dto.SettlePendingResultDTO;
 import com.betanalyzer.application.dto.SuggestionResponseDTO;
 import com.betanalyzer.application.dto.request.CreateSuggestionRequest;
 import com.betanalyzer.application.dto.request.SuggestionResultRequest;
@@ -41,6 +42,7 @@ public class BetSuggestionService {
     private final BetSuggestionMapper suggestionMapper;
     private final AnalysisSnapshotService analysisSnapshotService;
     private final FeatureCalculationService featureCalculationService;
+    private final SuggestionSettlementService suggestionSettlementService;
 
     @Transactional(readOnly = true)
     public Page<SuggestionResponseDTO> getSuggestions(SuggestionStatus status, LocalDate date, Pageable pageable) {
@@ -110,7 +112,7 @@ public class BetSuggestionService {
         return calculateROIValue(suggestion);
     }
 
-    private Double calculateROIValue(BetSuggestion suggestion) {
+    Double calculateROIValue(BetSuggestion suggestion) {
         if (suggestion.getStatus() == SuggestionStatus.PENDING || suggestion.getStatus() == null) {
             return 0.0;
         }
@@ -131,6 +133,11 @@ public class BetSuggestionService {
         }
 
         return 0.0;
+    }
+
+    @Transactional
+    public SettlePendingResultDTO settlePendingSuggestions() {
+        return suggestionSettlementService.settlePendingSuggestions();
     }
 
     @Transactional(readOnly = true)

@@ -26,6 +26,7 @@ public interface BetSuggestionRepository extends JpaRepository<BetSuggestion, UU
     List<BetSuggestion> findByMatchId(UUID matchId);
 
     List<BetSuggestion> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    @EntityGraph(attributePaths = {"match", "match.homeTeam", "match.awayTeam", "match.league"})
     List<BetSuggestion> findByStatus(SuggestionStatus status);
     void deleteByMatchId(UUID matchId);
 }
