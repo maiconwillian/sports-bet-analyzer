@@ -41,7 +41,7 @@ public class TheOddsApiClient {
                     .uri(uriBuilder -> uriBuilder
                             .path("/sports/{sport}/odds")
                             .queryParam("apiKey", properties.getKey())
-                            .queryParam("regions", "us")  // ← OBRIGATÓRIO!
+                            .queryParam("regions", properties.getRegions())
                             .queryParam("markets", "totals")
                             .queryParam("dateFormat", "iso")
                             .build(sport)

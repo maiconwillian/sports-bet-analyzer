@@ -16,5 +16,6 @@ public class MatchResponseDTO {
     private Integer awayGoals;
     private LocalDateTime matchDate;
     private String leagueName;
+    private String leagueCountry;
     private MatchStatus status;
 }

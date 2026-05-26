@@ -54,6 +54,7 @@ public interface MatchMapper {
     void updateEntity(FixtureDTO fixtureDTO, League league, Team homeTeam, Team awayTeam, @MappingTarget Match match);
 
     @Mapping(target = "leagueName", source = "league.name")
+    @Mapping(target = "leagueCountry", source = "league.country")
     @Mapping(target = "homeTeamName", source = "homeTeam.name")
     @Mapping(target = "awayTeamName", source = "awayTeam.name")
     MatchResponseDTO mapToResponseDTO(Match match);

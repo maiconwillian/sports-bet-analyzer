@@ -9,6 +9,9 @@ import java.util.UUID;
 public class SuggestionResponseDTO {
     private UUID id;
     private UUID matchId;
+    private String homeTeamName;
+    private String awayTeamName;
+    private String leagueName;
     private String market;
     private BigDecimal pickedOdd;
     private String pickedBookmaker;

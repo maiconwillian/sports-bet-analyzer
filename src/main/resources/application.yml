@@ -1,6 +1,9 @@
 spring:
   application:
     name: sports-bet-analyzer
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   datasource:
     url: jdbc:postgresql://localhost:5432/oddwise
     username: ${DB_USERNAME:postgres}
@@ -32,13 +35,14 @@ server:
 api:
   football:
     base-url: https://v3.football.api-sports.io
-    key: 71f295f76d69f0b9614f1fff3470b06a
+    key: ${API_FOOTBALL_KEY:71f295f76d69f0b9614f1fff3470b06a}
     host: v3.football.api-sports.io
     connect-timeout-ms: 5000
     read-timeout-ms: 10000
   odds:
     base-url: https://api.the-odds-api.com/v4
-    key: 63d7269ab5b2546f054a5c621e7570bb
+    key: ${ODDS_API_KEY:63d7269ab5b2546f054a5c621e7570bb}
+    regions: us,eu
     connect-timeout-ms: 5000
     read-timeout-ms: 10000
 
@@ -52,6 +56,9 @@ app:
       - BRASILEIRAO
       - PREMIER_LEAGUE
       - CHAMPIONS_LEAGUE
+      - LA_LIGA
+      - BUNDESLIGA
+      - SERIE_A
     supported-markets:
       - OVER_2_5
       - BTTS

@@ -11,6 +11,9 @@ import org.mapstruct.ReportingPolicy;
 public interface BetSuggestionMapper {
 
     @Mapping(target = "matchId", source = "match.id")
+    @Mapping(target = "homeTeamName", source = "match.homeTeam.name")
+    @Mapping(target = "awayTeamName", source = "match.awayTeam.name")
+    @Mapping(target = "leagueName", source = "match.league.name")
     SuggestionResponseDTO toResponseDTO(BetSuggestion suggestion);
 
     @Mapping(target = "match", ignore = true)

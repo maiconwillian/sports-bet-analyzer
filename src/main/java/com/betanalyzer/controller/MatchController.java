@@ -4,6 +4,7 @@ import com.betanalyzer.application.MatchService;
 import com.betanalyzer.application.dto.MatchResponseDTO;
 import com.betanalyzer.application.dto.request.CreateMatchRequest;
 import com.betanalyzer.application.dto.request.UpdateMatchRequest;
+import com.betanalyzer.domain.enums.SupportedLeague;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,6 +55,12 @@ public class MatchController {
     public ResponseEntity<List<MatchResponseDTO>> getMatchesByDate(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(matchService.getMatchesByDate(date));
+    }
+
+    @GetMapping("/supported-league/{league}")
+    public ResponseEntity<List<MatchResponseDTO>> getMatchesBySupportedLeague(
+            @PathVariable SupportedLeague league) {
+        return ResponseEntity.ok(matchService.getMatchesBySupportedLeague(league));
     }
 
     @GetMapping("/league/{league}")

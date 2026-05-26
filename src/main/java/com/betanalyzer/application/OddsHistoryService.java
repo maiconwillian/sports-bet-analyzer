@@ -7,6 +7,7 @@ import com.betanalyzer.infrastructure.client.TheOddsApiClient;
 import com.betanalyzer.infrastructure.client.dto.TheOddsResponseDTO;
 import com.betanalyzer.infrastructure.persistence.OddsRepository;
 import com.betanalyzer.shared.exception.ApiIntegrationException;
+import com.betanalyzer.shared.exception.BusinessLogicException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,12 +47,12 @@ public class OddsHistoryService {
         // 2. ← NOVO: Validar se a liga é suportada
         String sportKey = getSportKeyForLeague(match.getLeague());
         if (sportKey == null || sportKey.isBlank()) {
-            log.warn("League '{}' is not supported for odds capture. Supported leagues: {}",
-                match.getLeague().getName(),
-                Arrays.stream(SupportedLeague.values())
-                      .map(SupportedLeague::getApiName)
-                      .collect(Collectors.joining(", ")));
-            return List.of();
+            String supported = Arrays.stream(SupportedLeague.values())
+                    .map(SupportedLeague::getApiName)
+                    .collect(Collectors.joining(", "));
+            throw new BusinessLogicException(
+                    "Liga '" + match.getLeague().getName() + "' não suportada para captura de odds. "
+                            + "Ligas suportadas: " + supported);
         }
 
         // 3. Buscar Odds
@@ -131,22 +133,22 @@ log.info("📦 RESULTADO FINAL: {} odds capturadas", capturedOdds.size());
     }
 
     private String getSportKeyForLeague(com.betanalyzer.domain.model.League league) {
-        log.info("Mapping league: '{}' (apiId: {}) to sport key", league.getName(), league.getApiId());
+        log.info("Mapping league: '{}' / '{}' (apiId: {}) to sport key",
+                league.getName(), league.getCountry(), league.getApiId());
 
-        for (SupportedLeague supported : SupportedLeague.values()) {
-            if (supported.getApiName().equalsIgnoreCase(league.getName())) {
-                log.info("✅ Found mapping: {} -> {}", league.getName(), supported.getTheOddsSportKey());
-                return supported.getTheOddsSportKey();
-            }
+        Optional<SupportedLeague> supported = SupportedLeague.findByLeague(league.getName(), league.getCountry());
+        if (supported.isPresent()) {
+            log.info("✅ Found mapping: {} / {} -> {}",
+                    league.getName(), league.getCountry(), supported.get().getTheOddsSportKey());
+            return supported.get().getTheOddsSportKey();
         }
 
-        // ← MELHORAR AQUI: Ser mais específico
-        log.warn("❌ League '{}' (apiId: {}) is NOT in SupportedLeague enum. " +
-                        "Only these leagues are supported: {}",
+        log.warn("❌ League '{}' / '{}' (apiId: {}) is NOT in SupportedLeague enum. Supported: {}",
                 league.getName(),
+                league.getCountry(),
                 league.getApiId(),
                 Arrays.stream(SupportedLeague.values())
-                        .map(SupportedLeague::getApiName)
+                        .map(sl -> sl.getApiName() + " (" + sl.getCountry() + ")")
                         .collect(Collectors.joining(", ")));
 
         return null;

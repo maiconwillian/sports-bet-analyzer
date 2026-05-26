@@ -105,30 +105,31 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
+    public List<MatchResponseDTO> getMatchesBySupportedLeague(SupportedLeague supportedLeague) {
+        log.info("Fetching matches for supported league: {} ({})", supportedLeague, supportedLeague.getCountry());
+        return matchRepository.findAll().stream()
+                .filter(m -> supportedLeague.matches(m.getLeague().getName(), m.getLeague().getCountry()))
+                .map(matchMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<MatchResponseDTO> getMatchesByLeague(String leagueName) {
         log.info("Fetching matches for league: {}", leagueName);
-        
-        // ← NOVO: Usar o SupportedLeague para obter o country correto
-        Optional<SupportedLeague> supportedLeague = SupportedLeague.findByApiName(leagueName);
-        
+
+        Optional<SupportedLeague> supportedLeague = SupportedLeague.fromEnumName(leagueName)
+                .or(() -> SupportedLeague.findByApiName(leagueName));
+
         if (supportedLeague.isEmpty()) {
-            log.warn("League '{}' is not in SupportedLeague enum. Supported: {}", 
+            log.warn("League '{}' is not in SupportedLeague enum. Supported: {}",
                 leagueName,
                 Arrays.stream(SupportedLeague.values())
-                    .map(SupportedLeague::getApiName)
+                    .map(SupportedLeague::name)
                     .collect(Collectors.joining(", ")));
             return List.of();
         }
-        
-        SupportedLeague league = supportedLeague.get();
-        log.info("Enriched search: League {} -> Country {}", leagueName, league.getCountry());
-        
-        // ← AGORA filtra por NOME + COUNTRY
-        return matchRepository.findAll().stream()
-                .filter(m -> m.getLeague().getName().equalsIgnoreCase(leagueName) &&
-                            m.getLeague().getCountry().equalsIgnoreCase(league.getCountry()))
-                .map(matchMapper::toResponseDTO)
-                .collect(Collectors.toList());
+
+        return getMatchesBySupportedLeague(supportedLeague.get());
     }
 
     @Transactional

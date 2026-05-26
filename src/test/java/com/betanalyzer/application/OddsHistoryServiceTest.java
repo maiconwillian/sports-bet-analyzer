@@ -1,6 +1,6 @@
 package com.betanalyzer.application;
 
-import com.betanalyzer.domain.enums.SupportedLeague;
+import com.betanalyzer.shared.exception.BusinessLogicException;
 import com.betanalyzer.domain.model.League;
 import com.betanalyzer.domain.model.Match;
 import com.betanalyzer.domain.model.Odds;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,11 +57,11 @@ class OddsHistoryServiceTest {
         TheOddsResponseDTO.MarketDTO market = new TheOddsResponseDTO.MarketDTO("totals", List.of(outcome));
         TheOddsResponseDTO.BookmakerDTO bookmaker = new TheOddsResponseDTO.BookmakerDTO("bet365", "Bet365", List.of(market));
         TheOddsResponseDTO event = new TheOddsResponseDTO(
-                "match-1", "soccer_brazil_serie_a", "Soccer", LocalDateTime.now().plusDays(1).toString(),
+                "match-1", "soccer_brazil_campeonato", "Soccer", LocalDateTime.now().plusDays(1).toString(),
                 "Flamengo RJ", "Vasco da Gama", List.of(bookmaker)
         );
 
-        when(theOddsApiClient.getOddsForMatch(eq("soccer_brazil_serie_a"), any())).thenReturn(List.of(event));
+        when(theOddsApiClient.getOddsForMatch(eq("soccer_brazil_campeonato"), any())).thenReturn(List.of(event));
 
         // when
         List<Odds> result = oddsHistoryService.captureAndSaveOdds(match);
@@ -72,7 +73,7 @@ class OddsHistoryServiceTest {
         assertThat(result.get(0).getBookmaker()).isEqualTo("Bet365");
         
         verify(oddsRepository).saveAll(anyList());
-        verify(theOddsApiClient).getOddsForMatch(eq("soccer_brazil_serie_a"), any());
+        verify(theOddsApiClient).getOddsForMatch(eq("soccer_brazil_campeonato"), any());
     }
 
     @Test
@@ -88,11 +89,10 @@ class OddsHistoryServiceTest {
                 .matchDate(LocalDateTime.now().plusDays(1))
                 .build();
 
-        // when
-        List<Odds> result = oddsHistoryService.captureAndSaveOdds(match);
-
-        // then
-        assertThat(result).isEmpty();
+        // when / then
+        assertThatThrownBy(() -> oddsHistoryService.captureAndSaveOdds(match))
+                .isInstanceOf(BusinessLogicException.class)
+                .hasMessageContaining("não suportada");
         verifyNoInteractions(theOddsApiClient);
     }
 

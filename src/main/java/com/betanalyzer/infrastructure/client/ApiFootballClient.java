@@ -63,7 +63,7 @@ public class ApiFootballClient {
         List<FixtureDTO> allFixtures = getFixturesByDate(date);
 
         return allFixtures.stream()
-            .filter(f -> f.league().name().equalsIgnoreCase(league.getApiName()))
+            .filter(f -> league.matches(f.league().name(), f.league().country()))
             .filter(f -> dataQualityValidator.isQualityFixture(f, league))
             .collect(Collectors.toList());
     }

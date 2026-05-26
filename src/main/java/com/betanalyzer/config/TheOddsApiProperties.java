@@ -24,4 +24,7 @@ public class TheOddsApiProperties {
 
     @Positive(message = "Read timeout must be positive")
     private long readTimeoutMs = 10000;
+
+    /** Bookmaker regions (e.g. us, eu, uk). Comma-separated for multiple. */
+    private String regions = "us,eu";
 }
