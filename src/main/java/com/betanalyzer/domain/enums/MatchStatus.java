@@ -26,4 +26,12 @@ public enum MatchStatus {
         }
         return TBD; // Default or could throw exception
     }
+
+    /** Pré-jogo ou ao vivo — alinhado ao front {@code SUGGESTABLE_MATCH_STATUSES}. */
+    public boolean allowsOddsCapture() {
+        return switch (this) {
+            case NS, TBD, LIVE, HT, ET, ONE_H, TWO_H -> true;
+            default -> false;
+        };
+    }
 }

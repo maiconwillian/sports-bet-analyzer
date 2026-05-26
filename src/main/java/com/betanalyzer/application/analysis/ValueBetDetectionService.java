@@ -2,6 +2,9 @@ package com.betanalyzer.application.analysis;
 
 import com.betanalyzer.application.dto.MatchFeatureContextDTO;
 import com.betanalyzer.application.dto.ValueBetOpportunityResponse;
+import com.betanalyzer.application.dto.ValueBetsScanResponse;
+import com.betanalyzer.domain.model.MatchStats;
+import com.betanalyzer.infrastructure.persistence.MatchStatsRepository;
 import com.betanalyzer.application.feature.service.FeatureCalculationService;
 import com.betanalyzer.application.strategy.StrategyEvaluationService;
 import com.betanalyzer.config.ValueBetProperties;
@@ -37,6 +40,43 @@ public class ValueBetDetectionService {
     private final FeatureCalculationService featureCalculationService;
     private final StrategyEvaluationService strategyEvaluationService;
     private final ValueBetProperties valueBetProperties;
+    private final MatchStatsRepository matchStatsRepository;
+
+    @Transactional(readOnly = true)
+    public ValueBetsScanResponse scanValueBetsWithMeta(LocalDate date, SupportedLeague leagueFilter) {
+        List<ValueBetOpportunityResponse> opportunities = scanValueBets(date, leagueFilter);
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(LocalTime.MAX);
+
+        List<Match> eligible = matchRepository.findByMatchDateBetween(start, end).stream()
+                .filter(m -> m.getStatus() == MatchStatus.NS || m.getStatus() == MatchStatus.TBD)
+                .filter(m -> SupportedLeague.findByLeague(m.getLeague().getName(), m.getLeague().getCountry()).isPresent())
+                .filter(m -> leagueFilter == null || matchesLeague(m, leagueFilter))
+                .toList();
+
+        int enriched = 0;
+        for (Match m : eligible) {
+            Optional<MatchStats> stats = matchStatsRepository.findByMatchId(m.getId());
+            if (stats.isPresent() && stats.get().hasUsableEnrichment()) {
+                enriched++;
+            }
+        }
+
+        boolean statsIncomplete = eligible.isEmpty() || enriched < eligible.size();
+        String hint = statsIncomplete
+                ? "Execute Admin → Enriquecer análise na data antes de esperar oportunidades EV+. "
+                + enriched + "/" + eligible.size() + " partidas com stats."
+                : null;
+
+        return ValueBetsScanResponse.builder()
+                .date(date)
+                .opportunities(opportunities)
+                .matchesConsidered(eligible.size())
+                .matchesWithEnrichedStats(enriched)
+                .statsIncomplete(statsIncomplete)
+                .hint(hint)
+                .build();
+    }
 
     @Transactional(readOnly = true)
     public List<ValueBetOpportunityResponse> scanValueBets(LocalDate date, SupportedLeague leagueFilter) {

@@ -1,5 +1,6 @@
 package com.betanalyzer.application;
 
+import com.betanalyzer.domain.enums.MatchStatus;
 import com.betanalyzer.domain.enums.SupportedLeague;
 import com.betanalyzer.domain.model.Match;
 import com.betanalyzer.domain.model.Odds;
@@ -36,6 +37,13 @@ public class OddsHistoryService {
     public List<Odds> captureAndSaveOdds(Match match) {
         log.info("Capturing odds for match: {} vs {} (League: {})", 
                 match.getHomeTeam().getName(), match.getAwayTeam().getName(), match.getLeague().getName());
+
+        MatchStatus status = match.getStatus() != null ? match.getStatus() : MatchStatus.TBD;
+        if (!status.allowsOddsCapture()) {
+            throw new BusinessLogicException(
+                    "Só é possível capturar odds de jogos não finalizados (pré-jogo ou ao vivo). Status atual: "
+                            + status.getCode());
+        }
 
         // 1. Validar Data
         LocalDate matchDate = match.getMatchDate().toLocalDate();

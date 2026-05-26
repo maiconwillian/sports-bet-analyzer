@@ -91,7 +91,8 @@ Gerar de forma automatizada entre **3 e 5 sugestões de apostas semanais** com e
 
 | Fase | Escopo |
 |------|--------|
-| **1.75** | Match Intelligence — enrich stats (API-Football); UI sem 0/TBD |
+| ~~**1.75**~~ ✅ | Match Intelligence — enrich stats (API-Football); UI análise + EV+ com meta (Sprint 10) |
+| ~~**Sprint 11**~~ ✅ | `match-insights` batch; EV+ hub (oportunidades + radar rodada) — [SPRINT_11.md](SPRINT_11.md) |
 | **1.76** | Multi-market models — Over 2.5, BTTS, 1X2 + backtest por mercado |
 | **1.77** | Pick ranking — melhor mercado por jogo/rodada |
 | **1.8** | Propostas 3–5/semana — [PHASE_1_8_DRAFT.md](PHASE_1_8_DRAFT.md) *(após 1.75 + 1.77)* |

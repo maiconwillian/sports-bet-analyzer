@@ -1,5 +1,6 @@
 package com.betanalyzer.application;
 
+import com.betanalyzer.domain.enums.MatchStatus;
 import com.betanalyzer.shared.exception.BusinessLogicException;
 import com.betanalyzer.domain.model.League;
 import com.betanalyzer.domain.model.Match;
@@ -50,6 +51,7 @@ class OddsHistoryServiceTest {
                 .homeTeam(homeTeam)
                 .awayTeam(awayTeam)
                 .league(league)
+                .status(MatchStatus.NS)
                 .matchDate(LocalDateTime.now().plusDays(1))
                 .build();
 
@@ -77,6 +79,25 @@ class OddsHistoryServiceTest {
     }
 
     @Test
+    void shouldNotCaptureOddsIfMatchFinished() {
+        Team homeTeam = Team.builder().name("Home").build();
+        Team awayTeam = Team.builder().name("Away").build();
+        League league = League.builder().apiId(71L).name("Série A").country("Brazil").build();
+        Match match = Match.builder()
+                .homeTeam(homeTeam)
+                .awayTeam(awayTeam)
+                .league(league)
+                .status(MatchStatus.FT)
+                .matchDate(LocalDateTime.now().minusDays(1))
+                .build();
+
+        assertThatThrownBy(() -> oddsHistoryService.captureAndSaveOdds(match))
+                .isInstanceOf(BusinessLogicException.class)
+                .hasMessageContaining("não finalizados");
+        verifyNoInteractions(theOddsApiClient);
+    }
+
+    @Test
     void shouldNotCaptureOddsIfLeagueNotSupported() {
         // given
         Team homeTeam = Team.builder().name("Home").build();
@@ -86,6 +107,7 @@ class OddsHistoryServiceTest {
                 .homeTeam(homeTeam)
                 .awayTeam(awayTeam)
                 .league(league)
+                .status(MatchStatus.NS)
                 .matchDate(LocalDateTime.now().plusDays(1))
                 .build();
 

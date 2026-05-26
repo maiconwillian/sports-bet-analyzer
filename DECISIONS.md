@@ -96,6 +96,24 @@ Decisões arquiteturais e de produto. Formato curto: **contexto → decisão →
 
 ---
 
+## ADR-014 — Enrich pós-sync via endpoint separado (Phase 1.75)
+
+**Data:** 2026-05 (Sprint 10)  
+**Contexto:** Enriquecer cada partida no `FixtureSyncService` consome muitas chamadas API-Football PRO por sync.  
+**Decisão:** **Opção B** como padrão — `POST /api/admin/enrich/fixtures?date=` e `POST /api/matches/{id}/enrich`. Flag `app.enrich.auto-after-sync=false`. Opção A (auto após sync) reservada para flag `true` no futuro.  
+**Consequência:** Operador executa sync → enrich explícito → odds → EV+. Documentado em `OPERATIONS.md` e `SPRINT_10.md`.
+
+---
+
+## ADR-015 — EV+ page = oportunidades + ranking do dia (Sprint 11)
+
+**Data:** 2026-05 (Sprint 11)  
+**Contexto:** Lista `value-bets` vazia com stats OK parecia “bug”; análise só no detalhe da partida (N+1 lento).  
+**Decisão:** Novo `GET /api/analysis/match-insights` (batch por data). UI `/value-bets` com duas seções: oportunidades que passam limiares + **Análise da rodada** (todos elegíveis, ordenados por confiança). EV exibido no insight sempre com melhor odd Over 2.5 capturada.  
+**Consequência:** Limiares permanecem em `app.value-bet`; sinal `NEAR` (55–64% conf) orienta operador sem inflar lista EV+. Ver `SPRINT_11.md`.
+
+---
+
 ## Ritual de manutenção
 
 Após cada sprint relevante:

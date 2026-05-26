@@ -1,15 +1,24 @@
 package com.betanalyzer.application.dto;
 
-import lombok.Data;
+import lombok.Builder;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-public class MatchStatsResponseDTO {
-    private UUID id;
-    private UUID matchId;
-    private String homeTeamForm;
-    private String awayTeamForm;
-    private Double homeTeamGoalsAvg;
-    private Double awayTeamGoalsAvg;
-    private String headToHead;
-}
+@Builder
+public record MatchStatsResponseDTO(
+        UUID matchId,
+        String homeTeamForm,
+        String awayTeamForm,
+        Double homeTeamGoalsAvg,
+        Double awayTeamGoalsAvg,
+        Double homeTeamGoalsConcededAvg,
+        Double awayTeamGoalsConcededAvg,
+        Double homeOver25Rate,
+        Double awayOver25Rate,
+        Integer homeLeaguePosition,
+        Integer awayLeaguePosition,
+        String headToHead,
+        LocalDateTime lastUpdate,
+        boolean statsEnriched
+) {}

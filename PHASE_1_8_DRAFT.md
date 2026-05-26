@@ -9,7 +9,7 @@
 |------|---------|--------|
 | Phase 1.5c | Value bet detection (endpoint) | ✅ |
 | Phase 1.7 | Backtest com amostra ≥ 30 apostas/liga (onde for operar) | 🔄 operador |
-| **Phase 1.75** | Match Intelligence — stats reais (não 0/TBD) | ⬜ |
+| **Phase 1.75** | Match Intelligence — stats reais (não 0/TBD) | ✅ Sprint 10 |
 | **Phase 1.77** | Pick ranking — `bestPick` por jogo / rodada | ⬜ |
 
 Sem **1.75 + 1.77**, `generate-weekly` repetiria o problema do EV+ vazio (motor sem dados).

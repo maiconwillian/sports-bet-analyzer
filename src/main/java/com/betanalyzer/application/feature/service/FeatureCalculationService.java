@@ -38,10 +38,11 @@ public class FeatureCalculationService {
     private MatchStats createEmptyStats(Match match) {
         return com.betanalyzer.domain.model.MatchStats.builder()
                 .match(match)
-                .homeTeamGoalsAvg(0.0)   // ✅ ZERO = não calculado
-                .awayTeamGoalsAvg(0.0)   // ✅ ZERO = não calculado
-                .homeTeamForm("NOT_CALCULATED")
-                .awayTeamForm("NOT_CALCULATED")
+                .homeTeamGoalsAvg(0.0)
+                .awayTeamGoalsAvg(0.0)
+                .homeTeamForm("TBD")
+                .awayTeamForm("TBD")
+                .statsEnriched(false)
                 .lastUpdate(null)
                 .build();
     }

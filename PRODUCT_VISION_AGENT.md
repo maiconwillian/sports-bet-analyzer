@@ -1,6 +1,6 @@
 # OddWise — Visão: Agente de recomendação multi-mercado
 
-**Status:** planejado (pós Phase 1.75)  
+**Status:** Phase 1.75 ✅ · Sprint 11 (EV+ hub + `match-insights`) · próximo 1.77  
 **Última atualização:** 2026-05-26  
 **Relacionado:** [SportsBetAnalysisPlatform.md](SportsBetAnalysisPlatform.md) · [PHASE_1_8_DRAFT.md](PHASE_1_8_DRAFT.md) · ADR-003 · ADR-013
 
@@ -32,8 +32,8 @@ O operador recebe, por **data/rodada**, recomendações do **agente OddWise**:
 |------------|------|------|
 | Sync 6 ligas + país | ✅ | ✅ |
 | Odds capturadas (The Odds API) | ✅ totals / Over 2.5 | + 1X2 quando API permitir |
-| `MatchStats` (forma, médias, tabela) | **0 / TBD** pós-sync | Enrich API-Football |
-| EV+ (`/api/analysis/value-bets`) | Endpoint ✅; lista vazia sem stats | Depende de 1.75 |
+| `MatchStats` (forma, médias, tabela) | ✅ após **enrich** (`POST /api/admin/enrich/fixtures`) | Manter rotina pós-sync |
+| EV+ (`/api/analysis/value-bets`) | ✅ com `statsIncomplete` + hint | Requer enrich + odds |
 | Modelo 1X2 / empate | Non-goal Phase 1 (ADR-003) | Estratégia + backtest (1.76) |
 | Modelo BTTS | Config only | Idem (1.76) |
 | Melhor mercado por jogo | Não | Pick engine (1.77) |
@@ -162,11 +162,12 @@ Backend API  ←── React UI
 
 ## Checklist implementação (próximo sprint)
 
-- [ ] **1.75** `EnrichMatchAnalysisService` + popular `match_stats` da API-Football
-- [ ] UI: detalhe partida sem TBD/0
+- [x] **1.75** `EnrichMatchAnalysisService` + popular `match_stats` da API-Football (Sprint 10)
+- [x] **Sprint 11** `MatchInsightsService` + EV+ hub (oportunidades + radar rodada)
+- [x] UI: detalhe partida sem TBD/0 após enrich
 - [ ] **1.76** estratégias BTTS / 1X2 + liquidação por mercado
 - [ ] **1.77** `PickRankingService` + endpoints picks
-- [ ] Atualizar EV+ para usar stats reais
+- [x] EV+ usa stats reais + meta `statsIncomplete`
 - [ ] **1.8** entidades `PROPOSED` + UI fila
 - [ ] **1.85** MCP server + prompt Analyst
 - [ ] **2.0** workflow n8n documentado em OPERATIONS.md

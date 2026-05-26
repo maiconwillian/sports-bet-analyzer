@@ -211,6 +211,7 @@ public class FixtureSyncService {
                     .awayTeamGoalsAvg(0.0)
                     .homeTeamForm("TBD")
                     .awayTeamForm("TBD")
+                    .statsEnriched(false)
                     .lastUpdate(LocalDateTime.now())
                     .build();
 

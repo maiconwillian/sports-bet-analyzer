@@ -69,3 +69,6 @@ app:
     bankroll: 1000.0
   backtest:
     min-sample-bets: 30
+  enrich:
+    auto-after-sync: false
+    last-fixtures-for-form: 10

@@ -1,6 +1,10 @@
 package com.betanalyzer.controller;
 
+import com.betanalyzer.application.EnrichMatchAnalysisService;
+import com.betanalyzer.application.MatchAnalysisService;
 import com.betanalyzer.application.MatchService;
+import com.betanalyzer.application.dto.EnrichResultDTO;
+import com.betanalyzer.application.dto.MatchAnalysisResponseDTO;
 import com.betanalyzer.application.dto.MatchResponseDTO;
 import com.betanalyzer.application.dto.request.CreateMatchRequest;
 import com.betanalyzer.application.dto.request.UpdateMatchRequest;
@@ -24,6 +28,8 @@ import java.util.UUID;
 public class MatchController {
 
     private final MatchService matchService;
+    private final MatchAnalysisService matchAnalysisService;
+    private final EnrichMatchAnalysisService enrichMatchAnalysisService;
 
     @GetMapping
     public ResponseEntity<Page<MatchResponseDTO>> getAllMatches(Pageable pageable) {
@@ -33,6 +39,16 @@ public class MatchController {
     @GetMapping("/{id}")
     public ResponseEntity<MatchResponseDTO> getMatchById(@PathVariable UUID id) {
         return ResponseEntity.ok(matchService.getMatchById(id));
+    }
+
+    @GetMapping("/{id}/analysis")
+    public ResponseEntity<MatchAnalysisResponseDTO> getMatchAnalysis(@PathVariable UUID id) {
+        return ResponseEntity.ok(matchAnalysisService.getMatchAnalysis(id));
+    }
+
+    @PostMapping("/{id}/enrich")
+    public ResponseEntity<EnrichResultDTO> enrichMatch(@PathVariable UUID id) {
+        return ResponseEntity.ok(enrichMatchAnalysisService.enrichMatch(id));
     }
 
     @PostMapping

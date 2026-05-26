@@ -1,0 +1,8 @@
+ALTER TABLE match_stats
+    ADD COLUMN IF NOT EXISTS home_team_goals_conceded_avg DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS away_team_goals_conceded_avg DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS home_over25_rate DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS away_over25_rate DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS home_league_position INTEGER,
+    ADD COLUMN IF NOT EXISTS away_league_position INTEGER,
+    ADD COLUMN IF NOT EXISTS stats_enriched BOOLEAN NOT NULL DEFAULT FALSE;
