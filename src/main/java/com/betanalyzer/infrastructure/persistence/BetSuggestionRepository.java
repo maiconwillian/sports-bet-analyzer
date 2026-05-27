@@ -28,5 +28,23 @@ public interface BetSuggestionRepository extends JpaRepository<BetSuggestion, UU
     List<BetSuggestion> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
     @EntityGraph(attributePaths = {"match", "match.homeTeam", "match.awayTeam", "match.league"})
     List<BetSuggestion> findByStatus(SuggestionStatus status);
+
+    @EntityGraph(attributePaths = {"match", "match.homeTeam", "match.awayTeam", "match.league"})
+    List<BetSuggestion> findByStatusAndCreatedAtBetweenOrderByCreatedAtDesc(
+            SuggestionStatus status, LocalDateTime start, LocalDateTime end);
+
+    @EntityGraph(attributePaths = {"match", "match.homeTeam", "match.awayTeam", "match.league"})
+    Page<BetSuggestion> findByStatusInAndCreatedAtBetween(
+            List<SuggestionStatus> statuses, LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    long countByStatusAndCreatedAtBetween(SuggestionStatus status, LocalDateTime start, LocalDateTime end);
+
+    boolean existsByMatch_IdAndMarketAndStatusInAndCreatedAtBetween(
+            UUID matchId,
+            String market,
+            List<SuggestionStatus> statuses,
+            LocalDateTime start,
+            LocalDateTime end);
+
     void deleteByMatchId(UUID matchId);
 }

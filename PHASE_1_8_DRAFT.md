@@ -1,6 +1,6 @@
 # Phase 1.8 — Automação de sugestões (rascunho)
 
-**Status:** planejado · Sprint 10+  
+**Status:** implementado · Sprint 13 — [SPRINT_13.md](SPRINT_13.md)  
 **Visão completa:** [PRODUCT_VISION_AGENT.md](PRODUCT_VISION_AGENT.md)
 
 ## Pré-requisitos (obrigatórios antes de `generate-weekly`)
@@ -10,7 +10,7 @@
 | Phase 1.5c | Value bet detection (endpoint) | ✅ |
 | Phase 1.7 | Backtest com amostra ≥ 30 apostas/liga (onde for operar) | 🔄 operador |
 | **Phase 1.75** | Match Intelligence — stats reais (não 0/TBD) | ✅ Sprint 10 |
-| **Phase 1.77** | Pick ranking — `bestPick` por jogo / rodada | ⬜ |
+| **Phase 1.77** | Pick ranking — `bestPick` por jogo / rodada | ✅ [SPRINT_12.md](SPRINT_12.md) |
 
 Sem **1.75 + 1.77**, `generate-weekly` repetiria o problema do EV+ vazio (motor sem dados).
 

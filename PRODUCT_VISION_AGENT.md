@@ -1,7 +1,8 @@
 # OddWise — Visão: Agente de recomendação multi-mercado
 
-**Status:** Phase 1.75 ✅ · Sprint 11 (EV+ hub + `match-insights`) · próximo 1.77  
-**Última atualização:** 2026-05-26  
+**Status:** Phase 1.8 ✅ (Sprint 13) · próximo 1.76 ou calibração  
+**Última atualização:** 2026-05-26 (Sprint 13b docs)  
+**Roadmap único:** [ROADMAP_STATUS.md](ROADMAP_STATUS.md) · [../frontend/ROADMAP_STATUS.md](../frontend/ROADMAP_STATUS.md)  
 **Relacionado:** [SportsBetAnalysisPlatform.md](SportsBetAnalysisPlatform.md) · [PHASE_1_8_DRAFT.md](PHASE_1_8_DRAFT.md) · ADR-003 · ADR-013
 
 **Espelho frontend:** `../frontend/PRODUCT_VISION_AGENT.md`
@@ -36,27 +37,27 @@ O operador recebe, por **data/rodada**, recomendações do **agente OddWise**:
 | EV+ (`/api/analysis/value-bets`) | ✅ com `statsIncomplete` + hint | Requer enrich + odds |
 | Modelo 1X2 / empate | Non-goal Phase 1 (ADR-003) | Estratégia + backtest (1.76) |
 | Modelo BTTS | Config only | Idem (1.76) |
-| Melhor mercado por jogo | Não | Pick engine (1.77) |
-| Fila propostas semanais | Rascunho 1.8 | Após 1.75 + 1.77 |
+| Melhor mercado por jogo | ✅ Over 2.5 v1 (`round-picks`) | Multi-mercado (1.76) |
+| Fila propostas semanais | ✅ `generate-weekly`, PROPOSED, accept/reject (Sprint 13) | Refinar regras / auto n8n (2.0) |
 | Agente LLM + MCP | Não | 1.85 |
-| n8n semanal | Phase 2 (uma linha no charter) | 2.0 |
+| n8n semanal | Não | 2.0 |
 
-**Operação válida hoje:** sync → capturar odds → **Nova sugestão manual** (Over 2.5) → liquidar → backtest (com histórico).
+**Operação válida hoje:** sync → enrich → odds → **EV+ / match-insights** → **picks** → **gerar propostas** → aceitar → sugestão `PENDING` → liquidar → backtest → relatórios. Sugestão manual continua disponível.
 
 ---
 
 ## Evolução: hoje → próximo → alvo
 
 ```
-Hoje              Próximo (doc + build)           Alvo
-────              ─────────────────────           ────
-Over 2.5 only     Match Intelligence (1.75)       Agente multi-mercado
-EV+ vazio         Modelos por mercado (1.76)      “Melhor aposta da rodada”
-Manual            Pick ranking (1.77)             % por mercado + parecer
-                  Propostas 3–5/sem (1.8)
-React             MCP tools (1.85)                Você revisa e aceita
-                  n8n (2.0)
+Hoje (✅)                         Próximo                         Alvo
+────────                          ───────                         ────
+Over 2.5 + enrich + EV+ hub       1.76 BTTS/1X2 + backtest        Agente multi-mercado
+Picks + propostas semanais        Calibração limiares (opc.)      Melhor mercado por jogo
+UI React operador local           1.85 MCP + narrativa            Você revisa e aceita
+                                  2.0 n8n
 ```
+
+Detalhe por fase: [ROADMAP_STATUS.md](ROADMAP_STATUS.md).
 
 **Princípio (charter):** dados → **features reais** → backtest por mercado → automação/agente. Não pular direto para “agente que sugere tudo”.
 
@@ -73,7 +74,7 @@ React             MCP tools (1.85)                Você revisa e aceita
 | 5 | **1.85 — Analyst Agent** | LLM + MCP: narrativa sobre JSON do motor | Explica; não inventa odds |
 | 6 | **2.0 — n8n** | sync → enrich → picks → notificar | Scheduler do charter |
 
-**Phase 1.8** depende de **1.75 + 1.77** — ver [PHASE_1_8_DRAFT.md](PHASE_1_8_DRAFT.md).
+**Phase 1.8** ✅ — dependia de 1.75 + 1.77; ver [PHASE_1_8_DRAFT.md](PHASE_1_8_DRAFT.md) e [SPRINT_13.md](SPRINT_13.md).
 
 **BTTS / 1X2:** incluir em 1.76 somente com **backtest por mercado/liga**; ADR-003 mantém Over 2.5 como operação principal até validação.
 
@@ -164,11 +165,11 @@ Backend API  ←── React UI
 
 - [x] **1.75** `EnrichMatchAnalysisService` + popular `match_stats` da API-Football (Sprint 10)
 - [x] **Sprint 11** `MatchInsightsService` + EV+ hub (oportunidades + radar rodada)
-- [x] UI: detalhe partida sem TBD/0 após enrich
+- [x] **1.77** `PickRankingService` + `round-picks` / `match/{id}/picks` (Sprint 12)
+- [x] UI: detalhe partida sem TBD/0 após enrich · `/picks`
 - [ ] **1.76** estratégias BTTS / 1X2 + liquidação por mercado
-- [ ] **1.77** `PickRankingService` + endpoints picks
 - [x] EV+ usa stats reais + meta `statsIncomplete`
-- [ ] **1.8** entidades `PROPOSED` + UI fila
+- [x] **1.8** entidades `PROPOSED` + UI fila (Sprint 13)
 - [ ] **1.85** MCP server + prompt Analyst
 - [ ] **2.0** workflow n8n documentado em OPERATIONS.md
 

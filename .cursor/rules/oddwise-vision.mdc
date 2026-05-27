@@ -34,9 +34,13 @@ alwaysApply: true
 
 - **1.75** enrich API-Football (`EnrichMatchAnalysisService`, ADR-014)
 
-- **Sprint 11** `GET /api/analysis/match-insights` — radar da rodada; EV+ = filtro + ranking (ADR-015)
+- **Sprint 11** `match-insights` — radar da rodada (ADR-015)
 
-- Sugestões **manuais** via UI
+- **Sprint 12 / 1.77** `round-picks`, `bestPick` (ADR-016)
+
+- **Sprint 13 / 1.8** propostas `PROPOSED` → accept/reject (ADR-017)
+
+- Sugestões via UI (manual ou proposta aceita)
 
 
 
@@ -44,7 +48,7 @@ alwaysApply: true
 
 
 
-~~1.75~~ ✅ · ~~Sprint 11~~ ✅ → **1.77 picks** → 1.8 propostas → 1.85 MCP/agente → 2.0 n8n (1.76 multi-market quando backtest OK)
+~~1.75~~ ✅ · ~~Sprint 11–13~~ ✅ → **1.76 multi-market** → 1.85 MCP → 2.0 n8n
 
 
 
@@ -72,6 +76,7 @@ EV+ > winrate · backtest antes de escalar · narrow-and-deep · backend = fonte
 
 
 
+- **`ROADMAP_STATUS.md`** / `../frontend/ROADMAP_STATUS.md` — status único das fases
 - `SportsBetAnalysisPlatform.md` · `PRODUCT_VISION_AGENT.md` · `DECISIONS.md` · `OPERATIONS.md`
 
 

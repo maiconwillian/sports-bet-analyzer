@@ -31,6 +31,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.betanalyzer.domain.enums.SuggestionStatus.LOST;
+import static com.betanalyzer.domain.enums.SuggestionStatus.PENDING;
+import static com.betanalyzer.domain.enums.SuggestionStatus.PROPOSED;
+import static com.betanalyzer.domain.enums.SuggestionStatus.REJECTED;
+import static com.betanalyzer.domain.enums.SuggestionStatus.VOID;
+import static com.betanalyzer.domain.enums.SuggestionStatus.WON;
+
 @Service
 @RequiredArgsConstructor
 public class BetSuggestionService {
@@ -52,10 +59,10 @@ public class BetSuggestionService {
         if (status != null) {
             return suggestionRepository.findByStatusAndCreatedAtBetween(status, start, end, pageable)
                     .map(suggestionMapper::toResponseDTO);
-        } else {
-            return suggestionRepository.findByCreatedAtBetween(start, end, pageable)
-                    .map(suggestionMapper::toResponseDTO);
         }
+        return suggestionRepository.findByStatusInAndCreatedAtBetween(
+                        List.of(PENDING, WON, LOST, VOID), start, end, pageable)
+                .map(suggestionMapper::toResponseDTO);
     }
 
     @Transactional(readOnly = true)
@@ -113,7 +120,10 @@ public class BetSuggestionService {
     }
 
     Double calculateROIValue(BetSuggestion suggestion) {
-        if (suggestion.getStatus() == SuggestionStatus.PENDING || suggestion.getStatus() == null) {
+        if (suggestion.getStatus() == SuggestionStatus.PENDING
+                || suggestion.getStatus() == PROPOSED
+                || suggestion.getStatus() == REJECTED
+                || suggestion.getStatus() == null) {
             return 0.0;
         }
 

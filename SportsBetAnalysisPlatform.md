@@ -1,9 +1,10 @@
 # OddWise — Sports Bet Analyzer | PROJECT CHARTER
 
-**Última Atualização:** 2026-05-25  
-**Status:** Phase 1.7 Backtesting V1 ✅ + Frontend operacional ✅  
-**Versão:** 3.0 (6 ligas, odds integradas, UI completa, operação local)
+**Última Atualização:** 2026-05-26  
+**Status:** Sprint 13 ✅ · Phase 1.8 propostas · EV+ hub · picks · enrich  
+**Versão:** 3.1 (operação Over 2.5 end-to-end local)
 
+**Roadmap (fonte única):** [ROADMAP_STATUS.md](ROADMAP_STATUS.md) · [../frontend/ROADMAP_STATUS.md](../frontend/ROADMAP_STATUS.md)  
 **Documentos relacionados:** [DECISIONS.md](DECISIONS.md) · [OPERATIONS.md](OPERATIONS.md) · [GLOSSARY.md](GLOSSARY.md) · [PRODUCT_VISION_AGENT.md](PRODUCT_VISION_AGENT.md)  
 **Frontend:** https://github.com/maiconwillian/oddwise-frontend
 
@@ -92,10 +93,10 @@ Gerar de forma automatizada entre **3 e 5 sugestões de apostas semanais** com e
 | Fase | Escopo |
 |------|--------|
 | ~~**1.75**~~ ✅ | Match Intelligence — enrich stats (API-Football); UI análise + EV+ com meta (Sprint 10) |
-| ~~**Sprint 11**~~ ✅ | `match-insights` batch; EV+ hub (oportunidades + radar rodada) — [SPRINT_11.md](SPRINT_11.md) |
-| **1.76** | Multi-market models — Over 2.5, BTTS, 1X2 + backtest por mercado |
-| **1.77** | Pick ranking — melhor mercado por jogo/rodada |
-| **1.8** | Propostas 3–5/semana — [PHASE_1_8_DRAFT.md](PHASE_1_8_DRAFT.md) *(após 1.75 + 1.77)* |
+| ~~**Sprint 11**~~ ✅ | `match-insights` batch; EV+ hub — [SPRINT_11.md](SPRINT_11.md) |
+| ~~**1.77**~~ ✅ | Pick ranking — [SPRINT_12.md](SPRINT_12.md) |
+| ~~**1.8**~~ ✅ | Propostas semanais — [SPRINT_13.md](SPRINT_13.md) |
+| **1.76** | Multi-market models — BTTS, 1X2 + backtest por mercado |
 | **1.85** | Analyst Agent + MCP tools sobre API OddWise |
 | **1.9** | Sync inteligente / scheduler local |
 

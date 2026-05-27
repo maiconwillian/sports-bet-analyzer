@@ -114,6 +114,24 @@ Decisões arquiteturais e de produto. Formato curto: **contexto → decisão →
 
 ---
 
+## ADR-016 — Pick engine v1 = Over 2.5 only (Sprint 12 / 1.77)
+
+**Data:** 2026-05 (Sprint 12)  
+**Contexto:** Operador precisa do “melhor pick do dia” distinto do filtro EV+ automático (65%/5%).  
+**Decisão:** `PickRankingService` sobre `MatchInsightsService`; endpoints `round-picks` e `match/{id}/picks`. `bestPick` quando EV &gt; 0; `eligibleForAutoOpportunity` espelha `passesEvFilters`. Ranking por `confidence × (1 + EV)`. Sem BTTS/1X2 neste sprint.  
+**Consequência:** Desbloqueia Phase 1.8. Ver `SPRINT_12.md`.
+
+---
+
+## ADR-017 — Propostas semanais PROPOSED (Sprint 13 / 1.8)
+
+**Data:** 2026-05 (Sprint 13)  
+**Contexto:** Operador quer 3–5 apostas/semana sem criar tudo manualmente; humano no loop obrigatório.  
+**Decisão:** Status `PROPOSED` e `REJECTED` em `BetSuggestion`; `WeeklyProposalService` gera até `app.proposals.max-per-week` (5) a partir de `round-picks` com EV+; accept → `PENDING`; settlement e listagem operacional ignoram propostas.  
+**Consequência:** Ver `SPRINT_13.md`, `PHASE_1_8_DRAFT.md`.
+
+---
+
 ## Ritual de manutenção
 
 Após cada sprint relevante:
@@ -121,3 +139,4 @@ Após cada sprint relevante:
 1. Nova ADR se houve decisão irreversível ou importante.
 2. Atualizar status no [SportsBetAnalysisPlatform.md](SportsBetAnalysisPlatform.md).
 3. Espelhar ADRs relevantes no frontend `DECISIONS.md`.
+4. Atualizar [ROADMAP_STATUS.md](ROADMAP_STATUS.md) (e espelho frontend).

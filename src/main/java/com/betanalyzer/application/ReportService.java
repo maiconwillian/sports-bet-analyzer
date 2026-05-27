@@ -55,7 +55,11 @@ public class ReportService {
     }
 
     private RoiReportDTO calculateReport(List<BetSuggestion> suggestions, String period) {
-        long totalCount = suggestions.size();
+        List<BetSuggestion> operational = suggestions.stream()
+                .filter(s -> s.getStatus() != SuggestionStatus.PROPOSED
+                        && s.getStatus() != SuggestionStatus.REJECTED)
+                .toList();
+        long totalCount = operational.size();
         if (totalCount == 0) {
             return RoiReportDTO.builder()
                     .totalROI(0.0)
@@ -69,14 +73,14 @@ public class ReportService {
                     .build();
         }
 
-        long wonCount = suggestions.stream().filter(s -> s.getStatus() == SuggestionStatus.WON).count();
-        long lostCount = suggestions.stream().filter(s -> s.getStatus() == SuggestionStatus.LOST).count();
-        long voidCount = suggestions.stream().filter(s -> s.getStatus() == SuggestionStatus.VOID).count();
+        long wonCount = operational.stream().filter(s -> s.getStatus() == SuggestionStatus.WON).count();
+        long lostCount = operational.stream().filter(s -> s.getStatus() == SuggestionStatus.LOST).count();
+        long voidCount = operational.stream().filter(s -> s.getStatus() == SuggestionStatus.VOID).count();
 
         BigDecimal totalProfit = BigDecimal.ZERO;
         BigDecimal totalStake = BigDecimal.ZERO;
 
-        for (BetSuggestion s : suggestions) {
+        for (BetSuggestion s : operational) {
             BigDecimal stake = s.getStake() != null ? s.getStake() : new BigDecimal("100.00");
             if (s.getStatus() == SuggestionStatus.WON) {
                 BigDecimal profit = stake.multiply(s.getPickedOdd()).subtract(stake);

@@ -20,4 +20,5 @@ public class SuggestionResponseDTO {
     private BigDecimal stake;
     private SuggestionStatus status;
     private Double roi;
+    private String proposalReason;
 }

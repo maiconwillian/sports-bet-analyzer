@@ -1,6 +1,9 @@
 package com.betanalyzer.controller;
 
 import com.betanalyzer.application.BetSuggestionService;
+import com.betanalyzer.application.WeeklyProposalService;
+import com.betanalyzer.application.dto.GenerateWeeklyResultDTO;
+import com.betanalyzer.application.dto.request.AcceptProposalRequest;
 import com.betanalyzer.application.dto.SettlePendingResultDTO;
 import com.betanalyzer.application.dto.SuggestionResponseDTO;
 import com.betanalyzer.application.dto.request.CreateSuggestionRequest;
@@ -25,6 +28,33 @@ import java.util.UUID;
 public class SuggestionController {
 
     private final BetSuggestionService suggestionService;
+    private final WeeklyProposalService weeklyProposalService;
+
+    @GetMapping("/proposed")
+    public ResponseEntity<List<SuggestionResponseDTO>> getProposed(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return ResponseEntity.ok(weeklyProposalService.getProposedSuggestions(from, to));
+    }
+
+    @PostMapping("/generate-weekly")
+    public ResponseEntity<GenerateWeeklyResultDTO> generateWeekly(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return ResponseEntity.ok(weeklyProposalService.generateWeeklyProposals(from, to));
+    }
+
+    @PostMapping("/proposed/{id}/accept")
+    public ResponseEntity<SuggestionResponseDTO> acceptProposal(
+            @PathVariable UUID id,
+            @RequestBody(required = false) @Valid AcceptProposalRequest request) {
+        return ResponseEntity.ok(weeklyProposalService.acceptProposal(id, request));
+    }
+
+    @PostMapping("/proposed/{id}/reject")
+    public ResponseEntity<SuggestionResponseDTO> rejectProposal(@PathVariable UUID id) {
+        return ResponseEntity.ok(weeklyProposalService.rejectProposal(id));
+    }
 
     @GetMapping
     public ResponseEntity<Page<SuggestionResponseDTO>> getSuggestions(

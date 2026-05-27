@@ -3,7 +3,7 @@
 Guia operacional semanal para uso da plataforma em ambiente local.
 
 **Pré-requisitos:** Docker (Postgres), backend `:8080`, frontend `:5173`.  
-**Charter:** [SportsBetAnalysisPlatform.md](SportsBetAnalysisPlatform.md)
+**Charter:** [SportsBetAnalysisPlatform.md](SportsBetAnalysisPlatform.md) · **Roadmap:** [ROADMAP_STATUS.md](ROADMAP_STATUS.md)
 
 ---
 
@@ -57,6 +57,13 @@ Rotina: **enrich → odds → EV+** (duas visões).
 - Limiares: `app.value-bet.min-confidence` (65), `min-ev` (0.05)
 - Por partida: `GET /api/analysis/value-bets/match/{matchId}` · `GET /api/matches/{id}/analysis`
 - Teste piloto: [SPRINT_11.md](SPRINT_11.md) (`2026-05-30`, PSG x Arsenal ~61% no radar, vazio em value-bets)
+
+### 3b. Picks da rodada (1.77 — Sprint 12)
+
+- `GET /api/analysis/round-picks?date=` — `topPick`, `rankedPicks`, `actionablePicks`
+- `GET /api/analysis/match/{matchId}/picks` — `bestPick` + `recommendations`
+- Pick recomendado ≠ oportunidade EV+ automática (pode ter 61% conf. e EV+)
+- Ver [SPRINT_12.md](SPRINT_12.md)
 
 ### 4. Nova sugestão (manual)
 

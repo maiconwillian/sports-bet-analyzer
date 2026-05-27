@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +60,11 @@ public class MatchInsightsService {
                 .minEv(valueBetProperties.getMinEv())
                 .matchesConsidered(eligible.size())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<MatchInsightRowDTO> getInsightForMatch(UUID matchId) {
+        return matchRepository.findDetailedById(matchId).map(this::buildInsightRow);
     }
 
     private List<Match> findEligibleMatches(LocalDate date, SupportedLeague leagueFilter) {

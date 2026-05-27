@@ -72,3 +72,7 @@ app:
   enrich:
     auto-after-sync: false
     last-fixtures-for-form: 10
+  proposals:
+    max-per-week: 5
+    min-pick-score: 0
+    prefer-eligible-for-auto: false

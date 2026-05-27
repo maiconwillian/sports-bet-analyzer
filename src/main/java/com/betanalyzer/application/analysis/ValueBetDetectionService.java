@@ -164,6 +164,17 @@ public class ValueBetDetectionService {
                 .max(Comparator.comparing(o -> o.getOddsValue()));
     }
 
+    public BigDecimal suggestStake(double confidencePercent, BigDecimal odd) {
+        if (odd == null || odd.doubleValue() <= 1.0) {
+            return BigDecimal.valueOf(100.0).setScale(2, RoundingMode.HALF_UP);
+        }
+        double modelProb = confidencePercent / 100.0;
+        double kellyFull = calculateKellyFraction(modelProb, odd.doubleValue());
+        double kellyApplied = kellyFull * valueBetProperties.getKellyFraction();
+        return BigDecimal.valueOf(valueBetProperties.getBankroll() * kellyApplied)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
     private double calculateKellyFraction(double probability, double odd) {
         double b = odd - 1.0;
         if (b <= 0) {

@@ -54,6 +54,9 @@ public class BetSuggestion {
 
     private Double roi;
 
+    @Column(length = 500)
+    private String proposalReason;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
